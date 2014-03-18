@@ -1,0 +1,56 @@
+{
+    "firmwareVersion" : "Firmware1",
+    "villageMap" : {
+        "Baadu" : {
+            "imageName" : "image1",
+            "defaultProfile" : "profile1"
+        },
+        "Village2" : {
+            "imageName" : "image2",
+            "defaultProfile" : "profile1"
+        }
+    },
+    "imageDefinitions" : {
+        "image1" : {
+            "profiles" : {
+                "profile1" : {
+                    "systemLangauge" : "English",
+                    "systemMenu" : "123456",
+                    "contentPackage" : {
+                        "description" : "This is an object",
+                        "playlists" : [ {
+                            "playlistCategory" : "1-2",
+                            "contentIds" : [ "Content1" ]
+                        }, {
+                            "playlistCategory" : "2",
+                            "contentIds" : [ "Content1", "Content2" ]
+                        }
+                        ]
+                    }
+                }
+
+            }
+        },
+        "image2" : {
+            "profiles" : {
+
+                "profile1" : {
+                    "systemLangauge" : "Baadu",
+                    "systemMenu" : "123456",
+                    "contentPackage" : {
+                        "description" : "This is an object for Baadu speaking villages",
+                        "playlists" : [ {
+                            "playlistCategory" : "1-2",
+                            "contentIds" : [ "Content1" ]
+                        }, {
+                            "playlistCategory" : "2",
+                            "contentIds" : [ "Content1", "Content2" ]
+                        }
+                        ]
+                    }
+                }
+            }
+        }
+    }
+
+}
