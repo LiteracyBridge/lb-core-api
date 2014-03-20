@@ -11,7 +11,6 @@ import org.literacybridge.content.model.DeploymentDefinition;
 import org.literacybridge.content.model.ImageDefinition;
 import org.literacybridge.content.model.ImagePreference;
 import org.literacybridge.content.resolvers.ContentResolver;
-import sun.plugin2.message.SetAppletSizeMessage;
 
 import java.io.File;
 import java.io.FileInputStream;
