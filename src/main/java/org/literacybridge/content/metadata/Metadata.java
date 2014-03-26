@@ -11,6 +11,10 @@ import java.util.Map;
  */
 @Immutable
 public class Metadata {
+
+  public static final String CONTENT_LENGTH = "ContentLength";
+
+
   @Nonnull
   public final String contentId;
 

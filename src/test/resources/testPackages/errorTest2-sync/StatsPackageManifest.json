@@ -1,0 +1,10 @@
+{
+  "formatVersion" : 1,
+  "devices" : {
+      "device1" : {
+          "startTime" : "2015-01-01T8:12:12",
+          "endTime"  : "2015-02-01T8:12:12",
+          "incomplete" : false
+      }
+  }
+}
