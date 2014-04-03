@@ -1,5 +1,6 @@
 package org.literacybridge.stats.formats.syncDirectory;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -31,6 +32,16 @@ import java.util.regex.Pattern;
 */
 public class DirectoryProcessorNew extends AbstractDirectoryProcessor {
   protected static final Logger logger = LoggerFactory.getLogger(DirectoryProcessorNew.class);
+
+  public static final Map<String, String> CATEGORY_MAP = ImmutableMap.<String, String>builder()
+                                                                     .put("1", "AGRIC")
+                                                                     .put("1-2", "LIVESTOCK")
+                                                                     .put("2", "HEALTH")
+                                                                     .put("9", "FEEDBACK")
+                                                                     .put("0", "OTHER")
+                                                                     .put("$0-1", "TB")
+                                                                     .build();
+
 
   public static final Pattern ARCHIVED_LOG_PATTERN = Pattern.compile("log_(.*).txt");
 
