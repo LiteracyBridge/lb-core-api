@@ -7,6 +7,13 @@
   <version>1.0.0-SNAPSHOT</version>
   <name>core-api</name>
   <url>http://maven.apache.org</url>
+  <description>
+      This jar handles the file format and protocol operations for the Literacy Bridge system.  There are places
+  where annotations such as JPA are used to describe persistence, but NO database or external service dependencies should
+  exist in this jar.  Those layers should be built above this one.
+  </description>
+
+
   <dependencies>
       <dependency>
           <groupId>commons-io</groupId>

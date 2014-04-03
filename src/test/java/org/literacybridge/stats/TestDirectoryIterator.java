@@ -2,6 +2,7 @@ package org.literacybridge.stats;
 
 import org.easymock.EasyMock;
 import org.junit.Test;
+import org.literacybridge.stats.api.DirectoryCallbacks;
 import org.literacybridge.stats.model.*;
 import org.literacybridge.utils.FsUtils;
 

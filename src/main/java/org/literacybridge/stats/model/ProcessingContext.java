@@ -1,7 +1,4 @@
-package org.literacybridge.stats.formats;
-
-import org.literacybridge.stats.formats.SyncProcessingContext;
-import org.literacybridge.stats.model.DeploymentId;
+package org.literacybridge.stats.model;
 
 import java.util.regex.Pattern;
 

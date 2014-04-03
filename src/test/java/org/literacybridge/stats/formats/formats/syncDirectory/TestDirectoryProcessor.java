@@ -3,10 +3,10 @@ package org.literacybridge.stats.formats.formats.syncDirectory;
 import org.easymock.EasyMock;
 import org.junit.Test;
 import org.literacybridge.stats.api.TalkingBookDataProcessor;
-import org.literacybridge.stats.formats.ProcessingContext;
-import org.literacybridge.stats.formats.SyncProcessingContext;
-import org.literacybridge.stats.formats.formats.logFile.LogAction;
-import org.literacybridge.stats.formats.formats.logFile.LogLineContext;
+import org.literacybridge.stats.model.ProcessingContext;
+import org.literacybridge.stats.model.SyncProcessingContext;
+import org.literacybridge.stats.formats.logFile.LogAction;
+import org.literacybridge.stats.formats.logFile.LogLineContext;
 import org.literacybridge.stats.formats.statsFile.StatsFile;
 import org.literacybridge.stats.formats.syncDirectory.DirectoryProcessor;
 

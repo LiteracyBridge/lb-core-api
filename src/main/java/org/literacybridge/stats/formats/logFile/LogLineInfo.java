@@ -1,4 +1,4 @@
-package org.literacybridge.stats.formats.formats.logFile;
+package org.literacybridge.stats.formats.logFile;
 
 import org.joda.time.LocalTime;
 

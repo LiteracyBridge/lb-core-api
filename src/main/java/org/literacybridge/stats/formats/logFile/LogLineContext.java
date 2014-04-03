@@ -1,6 +1,6 @@
-package org.literacybridge.stats.formats.formats.logFile;
+package org.literacybridge.stats.formats.logFile;
 
-import org.literacybridge.stats.formats.SyncProcessingContext;
+import org.literacybridge.stats.model.SyncProcessingContext;
 
 /**
  * This is the context for a single line being parsed.  In include location info, to all errors to better

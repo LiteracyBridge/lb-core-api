@@ -1,4 +1,4 @@
-package org.literacybridge.stats.model;
+package org.literacybridge.stats.api;
 
 import org.literacybridge.stats.model.*;
 

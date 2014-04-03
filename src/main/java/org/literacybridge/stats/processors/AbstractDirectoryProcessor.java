@@ -1,14 +1,13 @@
 package org.literacybridge.stats.processors;
 
 import org.literacybridge.stats.model.DeploymentPerDevice;
-import org.literacybridge.stats.model.DirectoryCallbacks;
+import org.literacybridge.stats.api.DirectoryCallbacks;
 import org.literacybridge.stats.model.DeploymentId;
 import org.literacybridge.stats.model.DirectoryFormat;
 import org.literacybridge.stats.model.StatsPackageManifest;
 import org.literacybridge.stats.model.SyncDirId;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 
 /**

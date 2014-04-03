@@ -1,8 +1,6 @@
-package org.literacybridge.stats.formats;
+package org.literacybridge.stats.model;
 
 import org.joda.time.LocalDateTime;
-import org.literacybridge.stats.formats.ProcessingContext;
-import org.literacybridge.stats.model.SyncDirId;
 
 /**
  * THis is a general model class that is useful for processing any format of file that has

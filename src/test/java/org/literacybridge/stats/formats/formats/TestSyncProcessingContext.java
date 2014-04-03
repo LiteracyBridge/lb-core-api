@@ -3,7 +3,7 @@ package org.literacybridge.stats.formats.formats;
 import junit.framework.TestCase;
 import org.joda.time.LocalDateTime;
 import org.junit.Test;
-import org.literacybridge.stats.formats.SyncProcessingContext;
+import org.literacybridge.stats.model.SyncProcessingContext;
 
 public class TestSyncProcessingContext {
 

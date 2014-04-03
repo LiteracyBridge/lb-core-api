@@ -1,9 +1,9 @@
-package org.literacybridge.stats.formats.formats.logFile;
+package org.literacybridge.stats.formats.logFile;
 
 import com.google.common.collect.Lists;
 import org.joda.time.LocalTime;
 import org.literacybridge.stats.api.TalkingBookDataProcessor;
-import org.literacybridge.stats.formats.SyncProcessingContext;
+import org.literacybridge.stats.model.SyncProcessingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

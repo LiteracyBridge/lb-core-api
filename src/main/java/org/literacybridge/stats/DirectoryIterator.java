@@ -2,8 +2,8 @@ package org.literacybridge.stats;
 
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.io.filefilter.RegexFileFilter;
-import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.literacybridge.stats.api.DirectoryCallbacks;
 import org.literacybridge.stats.model.*;
 import org.literacybridge.stats.processors.ManifestCreationCallbacks;
 import org.literacybridge.utils.FsUtils;

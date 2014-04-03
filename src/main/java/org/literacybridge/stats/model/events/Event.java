@@ -1,6 +1,6 @@
 package org.literacybridge.stats.model.events;
 
-import org.literacybridge.stats.formats.formats.logFile.LogLineContext;
+import org.literacybridge.stats.formats.logFile.LogLineContext;
 
 import javax.persistence.*;
 import java.io.Serializable;

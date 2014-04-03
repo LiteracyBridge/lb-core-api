@@ -1,10 +1,10 @@
 package org.literacybridge.stats.api;
 
-import org.literacybridge.stats.formats.ProcessingContext;
-import org.literacybridge.stats.formats.SyncProcessingContext;
+import org.literacybridge.stats.model.ProcessingContext;
+import org.literacybridge.stats.model.SyncProcessingContext;
 import org.literacybridge.stats.formats.flashData.FlashData;
-import org.literacybridge.stats.formats.formats.logFile.LogAction;
-import org.literacybridge.stats.formats.formats.logFile.LogLineContext;
+import org.literacybridge.stats.formats.logFile.LogAction;
+import org.literacybridge.stats.formats.logFile.LogLineContext;
 import org.literacybridge.stats.formats.statsFile.StatsFile;
 
 import java.io.IOException;

@@ -1,11 +1,15 @@
 package org.literacybridge.stats.formats.formats.logFile;
 
 import junit.framework.TestCase;
+import org.easymock.EasyMock;
 import org.joda.time.LocalTime;
 import org.junit.Test;
-import org.easymock.EasyMock;
 import org.literacybridge.stats.api.TalkingBookDataProcessor;
-import org.literacybridge.stats.formats.SyncProcessingContext;
+import org.literacybridge.stats.formats.logFile.LogFileParser;
+import org.literacybridge.stats.formats.logFile.LogFilePosition;
+import org.literacybridge.stats.formats.logFile.LogLineContext;
+import org.literacybridge.stats.formats.logFile.LogLineInfo;
+import org.literacybridge.stats.model.SyncProcessingContext;
 import org.literacybridge.stats.formats.syncDirectory.DirectoryProcessor;
 
 import java.io.ByteArrayInputStream;
@@ -15,27 +19,30 @@ import java.io.InputStream;
 public class TestLogFileParser {
 
 
-    public static final SyncProcessingContext TEST_FILE_CONTEXT = new SyncProcessingContext("SyncDevice1", "10m1d16h37m35s", "TB10", "MyVillage", "ContentPackage", "ContentUpdate");
+  public static final SyncProcessingContext TEST_FILE_CONTEXT = new SyncProcessingContext("SyncDevice1",
+                                                                                          "10m1d16h37m35s", "TB10",
+                                                                                          "MyVillage", "ContentPackage",
+                                                                                          "ContentUpdate");
 
-    public static final String TEST_FILE_NAME = "TestFileName";
-    public static final LogFilePosition TEST_FILE_POSITION = new LogFilePosition(TEST_FILE_NAME, 1);
-    public static final LogFilePosition TEST_FILE_POSITION_2 = new LogFilePosition(TEST_FILE_NAME, 2);
-    public static final LogFilePosition TEST_FILE_POSITION_3 = new LogFilePosition(TEST_FILE_NAME, 3);
-
-
-    @Test
-    public void testParseLogLineInfo() {
-
-      TalkingBookDataProcessor eventInterface = EasyMock.createMock(TalkingBookDataProcessor.class);
-        LogFileParser logFileParser = new LogFileParser(eventInterface, TEST_FILE_CONTEXT, DirectoryProcessor.CATEGORY_MAP);
+  public static final String          TEST_FILE_NAME       = "TestFileName";
+  public static final LogFilePosition TEST_FILE_POSITION   = new LogFilePosition(TEST_FILE_NAME, 1);
+  public static final LogFilePosition TEST_FILE_POSITION_2 = new LogFilePosition(TEST_FILE_NAME, 2);
+  public static final LogFilePosition TEST_FILE_POSITION_3 = new LogFilePosition(TEST_FILE_NAME, 3);
 
 
-        LogLineInfo logLineInfo = logFileParser.parseLogLineInfo("2r0096c008p023d18h18m53s401/314/314V");
-        TestCase.assertEquals(2, logLineInfo.householdRotation);
-        TestCase.assertEquals(96, logLineInfo.cycle);
-        TestCase.assertEquals(8, logLineInfo.period);
-        TestCase.assertEquals(23, logLineInfo.dayOfPeriod);
-        TestCase.assertEquals(new LocalTime(18, 18, 53), logLineInfo.timeInPeriod);
+  @Test
+  public void testParseLogLineInfo() {
+
+    TalkingBookDataProcessor eventInterface = EasyMock.createMock(TalkingBookDataProcessor.class);
+    LogFileParser logFileParser = new LogFileParser(eventInterface, TEST_FILE_CONTEXT, DirectoryProcessor.CATEGORY_MAP);
+
+
+    LogLineInfo logLineInfo = logFileParser.parseLogLineInfo("2r0096c008p023d18h18m53s401/314/314V");
+    TestCase.assertEquals(2, logLineInfo.householdRotation);
+    TestCase.assertEquals(96, logLineInfo.cycle);
+    TestCase.assertEquals(8, logLineInfo.period);
+    TestCase.assertEquals(23, logLineInfo.dayOfPeriod);
+    TestCase.assertEquals(new LocalTime(18, 18, 53), logLineInfo.timeInPeriod);
         TestCase.assertEquals(4.01, logLineInfo.maxVolts);
         TestCase.assertEquals(3.14, logLineInfo.steadyStateVolts);
         TestCase.assertEquals(3.14, logLineInfo.minVolts);
