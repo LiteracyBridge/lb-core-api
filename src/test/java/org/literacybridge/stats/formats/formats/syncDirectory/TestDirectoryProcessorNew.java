@@ -3,13 +3,13 @@ package org.literacybridge.stats.formats.formats.syncDirectory;
 import org.easymock.EasyMock;
 import org.junit.Test;
 import org.literacybridge.stats.api.TalkingBookDataProcessor;
+import org.literacybridge.stats.formats.syncDirectory.DirectoryProcessor;
 import org.literacybridge.stats.model.ProcessingContext;
 import org.literacybridge.stats.model.SyncProcessingContext;
 import org.literacybridge.stats.formats.logFile.LogAction;
 import org.literacybridge.stats.formats.logFile.LogLineContext;
 import org.literacybridge.stats.formats.statsFile.StatsFile;
 import org.literacybridge.stats.DirectoryIterator;
-import org.literacybridge.stats.formats.syncDirectory.DirectoryProcessorNew;
 import org.literacybridge.stats.model.DirectoryFormat;
 import org.literacybridge.utils.FsUtils;
 
@@ -50,13 +50,13 @@ public class TestDirectoryProcessorNew {
     //Events from /log-archive/log_TB0002FE_0003_0000.txt
     eventInterface.onLogFileStart(TB0002FE_0003_File.getAbsolutePath());
 
-    eventInterface.onCategory(anyObject(LogLineContext.class), eq(DirectoryProcessorNew.CATEGORY_MAP.get("1")));
+    eventInterface.onCategory(anyObject(LogLineContext.class), eq(DirectoryProcessor.CATEGORY_MAP.get("1")));
     eventInterface.onPlay(anyObject(LogLineContext.class), eq("TB0003e8_6F58EE29"), eq(3), eq(3.49));
     eventInterface.onVoltageDrop(anyObject(LogLineContext.class), eq(LogAction.paused), eq(0.04), eq(0));
 
-    eventInterface.onCategory(anyObject(LogLineContext.class), eq(DirectoryProcessorNew.CATEGORY_MAP.get("1")));
-    eventInterface.onCategory(anyObject(LogLineContext.class), eq(DirectoryProcessorNew.CATEGORY_MAP.get("1-2")));
-    eventInterface.onCategory(anyObject(LogLineContext.class), eq(DirectoryProcessorNew.CATEGORY_MAP.get("2")));
+    eventInterface.onCategory(anyObject(LogLineContext.class), eq(DirectoryProcessor.CATEGORY_MAP.get("1")));
+    eventInterface.onCategory(anyObject(LogLineContext.class), eq(DirectoryProcessor.CATEGORY_MAP.get("1-2")));
+    eventInterface.onCategory(anyObject(LogLineContext.class), eq(DirectoryProcessor.CATEGORY_MAP.get("2")));
     eventInterface.onPlay(anyObject(LogLineContext.class), eq("LB-2_fz02ma8nab_d"), eq(3), eq(3.16));
     eventInterface.onPlayed(anyObject(LogLineContext.class), eq("LB-2_fz02ma8nab_d"), eq((short) 13), eq((short) 422),
                             eq(3), eq(3.16), eq(false));
@@ -68,7 +68,7 @@ public class TestDirectoryProcessorNew {
 
     //Events from /log-archive/log_TB0002FE_0004_0000.txt
     eventInterface.onLogFileStart(TB0002FE_0004_File.getAbsolutePath());
-    eventInterface.onCategory(EasyMock.anyObject(LogLineContext.class), eq(DirectoryProcessorNew.CATEGORY_MAP.get("2")));
+    eventInterface.onCategory(EasyMock.anyObject(LogLineContext.class), eq(DirectoryProcessor.CATEGORY_MAP.get("2")));
     eventInterface.onPlay(EasyMock.anyObject(LogLineContext.class), eq("LB-2_fz02ma8nab_d"), eq(3), eq(2.89));
     eventInterface.onPlayed(EasyMock.anyObject(LogLineContext.class), eq("LB-2_fz02ma8nab_d"), eq((short) 12),
                             eq((short) 422), eq(3), eq(2.89), eq(false));
@@ -83,7 +83,7 @@ public class TestDirectoryProcessorNew {
     eventInterface.onVoltageDrop(anyObject(LogLineContext.class), eq(LogAction.paused), eq(.04), eq(136));
     eventInterface.onShuttingDown(anyObject(LogLineContext.class));
 
-    eventInterface.onCategory(anyObject(LogLineContext.class), eq(DirectoryProcessorNew.CATEGORY_MAP.get("1")));
+    eventInterface.onCategory(anyObject(LogLineContext.class), eq(DirectoryProcessor.CATEGORY_MAP.get("1")));
     eventInterface.onPlay(anyObject(LogLineContext.class), eq("H_0200_6A0564FF"), eq(04), eq(2.90));
     eventInterface.onPlayed(anyObject(LogLineContext.class), eq("H_0200_6A0564FF"), eq((short) 1), eq((short) 818),
                             eq(04), eq(2.90), eq(false));
@@ -104,7 +104,7 @@ public class TestDirectoryProcessorNew {
 
     EasyMock.replay(eventInterface);
 
-    DirectoryProcessorNew processor = new DirectoryProcessorNew(eventInterface, DirectoryProcessorNew.CATEGORY_MAP);
+    DirectoryProcessor processor = new DirectoryProcessor(eventInterface, DirectoryProcessor.CATEGORY_MAP);
     DirectoryIterator iterator = new DirectoryIterator(testRoot, DirectoryFormat.Sync, true);
     iterator.process(processor);
 

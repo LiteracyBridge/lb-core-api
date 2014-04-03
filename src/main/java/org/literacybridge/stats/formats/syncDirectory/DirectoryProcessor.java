@@ -30,8 +30,8 @@ import java.util.regex.Pattern;
 
 /**
 */
-public class DirectoryProcessorNew extends AbstractDirectoryProcessor {
-  protected static final Logger logger = LoggerFactory.getLogger(DirectoryProcessorNew.class);
+public class DirectoryProcessor extends AbstractDirectoryProcessor {
+  protected static final Logger logger = LoggerFactory.getLogger(DirectoryProcessor.class);
 
   public static final Map<String, String> CATEGORY_MAP = ImmutableMap.<String, String>builder()
                                                                      .put("1", "AGRIC")
@@ -55,14 +55,14 @@ public class DirectoryProcessorNew extends AbstractDirectoryProcessor {
   final List<TalkingBookDataProcessor> dataProcessorEventListeners;
   final Map<String, String>            categoryMap;
 
-  public DirectoryProcessorNew(TalkingBookDataProcessor dataProcessorEventListeners, Map<String, String> categoryMap) {
+  public DirectoryProcessor(TalkingBookDataProcessor dataProcessorEventListeners, Map<String, String> categoryMap) {
     this.dataProcessorEventListeners = Lists.newArrayList(dataProcessorEventListeners);
     this.categoryMap = categoryMap;
   }
 
 
-  public DirectoryProcessorNew(List<TalkingBookDataProcessor> dataProcessorEventListeners,
-                               Map<String, String> categoryMap) {
+  public DirectoryProcessor(List<TalkingBookDataProcessor> dataProcessorEventListeners,
+                            Map<String, String> categoryMap) {
     this.dataProcessorEventListeners = dataProcessorEventListeners;
     this.categoryMap = categoryMap;
   }
