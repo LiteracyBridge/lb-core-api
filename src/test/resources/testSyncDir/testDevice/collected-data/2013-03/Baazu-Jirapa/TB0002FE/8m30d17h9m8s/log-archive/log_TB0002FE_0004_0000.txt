@@ -1,0 +1,23 @@
+0r0000c000p000d10h08m56s000/289/252V:v289,MV08,C00
+
+---------------------------------------------------
+Serial#:TB0002FE
+Clock:0r0004c004p000d10h08m56s
+0r0004c004p000d10h08m57s336/289/289V:setRTCalarm(0,0,0)
+0r0004c004p000d10h08m57s289/289/289V:set ALM 0000h00m00s
+Location:Baazu-Jirapa
+Version:v1.83r1059
+Reflashes:0002  (3808 words remaining)
+Package:2013-03  Cycle:0004  Rotation:0  Period:0004  Powered Days:0000
+Debug:Normal
+0r0004c004p000d10h08m58s333/289/289V:Init volt:289
+0r0004c004p000d10h08m58s333/289/289V:PROFILE: dga,hhr,hhr
+0r0004c004p000d10h09m13s349/289/289V:Category: 2
+0r0004c004p000d10h09m21s349/289/289V:PLAY LB-2_fz02ma8nab_d @VOL=03 @Volt=289
+0r0004c004p000d10h09m33s347/289/289V:PLAYED LB-2_fz02ma8nab_d 0012/0422sec @VOL=03 @Volt=289
+
+0r0004c004p000d10h09m33s289/289/289V:PLAY LB-2_x6g9tv0p3e_m @VOL=03 @Volt=289
+0r0004c004p000d10h12m58s348/289/289V:PLAYED LB-2_x6g9tv0p3e_m 0205/0204sec @VOL=03 @Volt=289-Ended
+
+0r0004c004p000d10h15m59s347/289/289V:Halting
+0r0004c004p000d10h16m00s289/289/289V:buildExchgOstats returns, no new ostat data

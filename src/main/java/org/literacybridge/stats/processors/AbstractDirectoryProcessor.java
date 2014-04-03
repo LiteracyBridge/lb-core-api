@@ -53,7 +53,7 @@ abstract public class AbstractDirectoryProcessor implements DirectoryCallbacks {
   }
 
   @Override
-  public void processTbLoaderLogFile(File tbdataFile) {
+  public void processTbLoaderLogFile(File tbdataFile)  throws IOException {
 
   }
 

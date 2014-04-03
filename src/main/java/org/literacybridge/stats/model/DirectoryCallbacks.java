@@ -17,7 +17,7 @@ public interface DirectoryCallbacks {
   void endDeviceOperationalData();
 
   void processTbDataFile(File tbdataFile) throws IOException;
-  void processTbLoaderLogFile(File tbdataFile);
+  void processTbLoaderLogFile(File tbdataFile) throws IOException;
 
   boolean startDeviceDeployment(DeploymentPerDevice deploymentPerDevice, DeploymentId deploymentId) throws Exception;
   void endDeviceDeployment() throws Exception;

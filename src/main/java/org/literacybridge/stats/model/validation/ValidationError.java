@@ -13,6 +13,12 @@ public class ValidationError {
   public static final int INVALID_DATA_IN_TBDATA = 7;
   public static final int UNMATCHED_TBDATA_ENTRIES = 8;
 
+  public static final int INVALID_VILLAGE_NAME = 9;
+  public static final int INVALID_TALKING_BOOK_NAME = 10;
+  public static final int INVALID_DEPLOYMENT_ID = 11;
+  public static final int EMPTY_SYNC_DIRECTORY = 12;
+
+
   public final String   errorMessage;
   public final int      errorId;
 

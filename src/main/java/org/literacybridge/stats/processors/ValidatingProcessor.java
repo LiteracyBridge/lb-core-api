@@ -21,11 +21,13 @@ public class ValidatingProcessor extends AbstractDirectoryProcessor {
   protected static final Logger logger             = LoggerFactory.getLogger(ValidatingProcessor.class);
   public static final    String DEPLOY_ID_EXPECTED = "YYYY-XX formatted string with YYYYY being the year and XX being the current deployment in this year.";
   public static final    String SYNC_DIR_EXPECTED  = "Sync directory could not be parsed correct.  Look at https://docs.google.com/document/d/12Q0a7x15FqeZ4ys0gYy4O2MtWYrvGDUegOXwlsG9ZQY for a desciption of the appropriate formats.";
+  public static final    String CHECK_DISK_REFORMAT = "chkdsk-reformat.txt";
 
-  final List<ValidationError>               validationErrors = new ArrayList<>();
-  final TreeMap<SyncDirId, OperationalInfo> tbDataInfo       = new TreeMap<>();
-  final int                                 maxTimeWindow    = 10;
 
+  public final List<ValidationError> validationErrors = new ArrayList<>();
+
+  final TreeMap<SyncDirId, OperationalInfo>   tbDataInfo                  = new TreeMap<>();
+  final int                                   maxTimeWindow               = 10;
   final IdentityHashMap<SyncDirId, SyncDirId> foundSyncDirs               = new IdentityHashMap<>();
   final Set<String>                           deviceIncorrectlyInManifest = new HashSet<>();
 
@@ -68,7 +70,10 @@ public class ValidatingProcessor extends AbstractDirectoryProcessor {
       return;
     }
 
-
+    if (line.length < 11) {
+      logger.error("Corrupt line.  Only has " + line.length + " fields in it.  " + tbdataFile.getPath() + ":" + lineNumber);
+      return;
+    }
     //Get the syncDir + the deployment ID for this entry
     String syncDirName = line[0];
     String inTalkingBook = line[2];
@@ -112,7 +117,7 @@ public class ValidatingProcessor extends AbstractDirectoryProcessor {
 
       //Theoretically, we can have dups, but it is unlikely.  In this case, log and add at a later millisecond.
       while ((operationalInfo = tbDataInfo.put(syncDirId, operationalInfo)) != null) {
-        localDateTime = localDateTime.plusMillis(1);
+        syncDirId = syncDirId.addMilli();
       }
     } else {
       logger.error("Corrupt line " + tbdataFile.getPath() + ":" + lineNumber);
@@ -122,6 +127,18 @@ public class ValidatingProcessor extends AbstractDirectoryProcessor {
 
   @Override
   public void processSyncDir(SyncDirId syncDirId, File syncDir) throws Exception {
+
+
+    //If this file is due to major corruption, just bail out.
+    File  chkdiskFile = new File(syncDir, CHECK_DISK_REFORMAT);
+    if (chkdiskFile.exists()) {
+      return;
+    }
+
+    if (syncDir.list().length == 0) {
+      validationErrors.add(new EmptySyncDirectory(syncDir));
+      return;
+    }
 
     //Find closest matching TbData entry
     SyncDirId tbDataEntry = findMatchingTbDataEntry(syncDirId, syncDir);
@@ -140,7 +157,7 @@ public class ValidatingProcessor extends AbstractDirectoryProcessor {
       OperationalInfo operationalInfo = tbDataInfo.get(tbDataEntry);
       List<IncorrectPropertyValue>  incorrectPropertyValues = new LinkedList<>();
 
-      if (!currVillage.equalsIgnoreCase(operationalInfo.inVillage)) {
+      if (!currVillage.equalsIgnoreCase(operationalInfo.inVillage) && !"UNKNOWN".equalsIgnoreCase(operationalInfo.inVillage)) {
         incorrectPropertyValues.add(new IncorrectPropertyValue("Village", operationalInfo.inVillage, currVillage));
       }
 

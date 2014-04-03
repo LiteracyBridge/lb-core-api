@@ -84,6 +84,14 @@ public class SyncDirId implements Comparable<SyncDirId>{
     this.version = version;
   }
 
+  /**
+   * Adds a millisecond to the localdatetime.  This is to uniquify in some collections.
+   * @return
+   */
+  public SyncDirId addMilli() {
+    return new SyncDirId(dateTime.plusMillis(1), dirName, uniquifier, version);
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;

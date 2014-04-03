@@ -1,0 +1,109 @@
+
+---------------------------------------------------
+Serial#:TB0002FE
+Clock:0001c000p000d09h14m22s
+0001c000p000d09h14m23s362/299/299V:Cannot open a://system/config.bin
+Found new firmware:r1059.img
+
+---------------------------------------------------
+Serial#:TB0002FE
+Clock:0r0000c001p000d09h15m18s
+0r0000c001p000d09h15m18s359/347/252V:setRTCalarm(0,0,0)
+0r0000c001p000d09h15m18s347/347/347V:set ALM 0000h00m00s
+0r0000c001p000d09h15m19s368/347/347V:Cannot open a://system/config.bin
+Set Clock:0r0000c001p000d00h01m00s (time and/or date reset by *.rtc file)
+Location:Baazu-Jirapa
+Version:v1.83r1059
+Reflashes:0002  (3988 words remaining)
+Package:2013-03  Cycle:0000  Rotation:0  Period:0001  Powered Days:0000
+Debug:Normal
+Inspect triggered
+Apparently ABNORMAL shutdown (no or corrupt config.bin)
+0r0000c001p000d00h01m00s354/347/347V:Init volt:347
+0r0000c001p000d00h01m01s357/347/347V:PROFILE: dga,hhr,hhr
+0r0000c001p000d00h01m01s355/341/338V:Initializing new Volume Profile
+
+---------------------------------------------------
+Serial#:TB0002FE
+Clock:0r0000c002p000d09h11m50s
+BOOT_TYPE_COLD_RESET -- NEW BATTERIES???
+Halting after cold start
+
+---------------------------------------------------
+Serial#:TB0002FE
+Clock:0r0001c002p000d09h11m53s
+0r0001c002p000d09h11m53s355/335/252V:setRTCalarm(0,0,0)
+0r0001c002p000d09h11m53s335/335/335V:set ALM 0000h00m00s
+0r0001c002p000d09h11m53s368/335/335V:Cannot open a://system/config.bin
+Location:Baazu-Jirapa
+Version:v1.83r1059
+Reflashes:0002  (3983 words remaining)
+Package:2013-03  Cycle:0001  Rotation:0  Period:0002  Powered Days:0000
+Debug:Normal
+Apparently ABNORMAL shutdown (no or corrupt config.bin)
+0r0001c002p000d09h11m53s364/335/335V:Init volt:335
+0r0001c002p000d09h11m54s357/335/335V:PROFILE: dga,hhr,hhr
+0r0001c002p000d09h11m54s368/335/335V:Initializing new Volume Profile
+
+---------------------------------------------------
+Serial#:TB0002FE
+Clock:0r0001c003p000d09h31m59s
+BOOT_TYPE_COLD_RESET -- NEW BATTERIES???
+Halting after cold start
+
+---------------------------------------------------
+Serial#:TB0002FE
+Clock:0r0002c003p000d09h32m00s
+0r0002c003p000d09h32m00s360/349/252V:setRTCalarm(0,0,0)
+0r0002c003p000d09h32m00s349/349/349V:set ALM 0000h00m00s
+0r0002c003p000d09h32m01s370/349/348V:Cannot open a://system/config.bin
+Location:Baazu-Jirapa
+Version:v1.83r1059
+Reflashes:0002  (3978 words remaining)
+Package:2013-03  Cycle:0002  Rotation:0  Period:0003  Powered Days:0000
+Debug:Normal
+Apparently ABNORMAL shutdown (no or corrupt config.bin)
+0r0002c003p000d09h32m01s363/349/349V:Init volt:349
+0r0002c003p000d09h32m01s359/349/349V:PROFILE: dga,hhr,hhr
+0r0002c003p000d09h32m01s371/349/349V:Initializing new Volume Profile
+0r0002c003p000d09h32m07s394/349/349V:Category: 1
+0r0002c003p000d09h32m08s390/349/349V:PLAY TB0003e8_6F58EE29 @VOL=03 @Volt=349
+��1169cI52p-N�d09h43m49s326/325/252V:PAUSED VOLTAGE DROP: 0.04v in 0000 sec
+�r1169cI52p-N/d09h43m49s325/325/325V:VOLTAGE DROP RATE: 040
+
+---------------------------------------------------
+Serial#:TB0002FE
+Clock:0r0002c004p000d09h43m49s
+BOOT_TYPE_COLD_RESET -- NEW BATTERIES???
+Halting after cold start
+0r0000c000p000d09h43m52s000/316/252V:v316,MV11,C00
+
+---------------------------------------------------
+Serial#:TB0002FE
+Clock:0r0003c004p000d09h43m52s
+0r0003c004p000d09h43m52s337/316/316V:setRTCalarm(0,0,0)
+0r0003c004p000d09h43m52s316/316/316V:set ALM 0000h00m00s
+0r0003c004p000d09h43m53s341/316/316V:Cannot open a://system/config.bin
+Location:Baazu-Jirapa
+Version:v1.83r1059
+Reflashes:0002  (3973 words remaining)
+Package:2013-03  Cycle:0003  Rotation:0  Period:0004  Powered Days:0000
+Debug:Normal
+Apparently ABNORMAL shutdown (no or corrupt config.bin)
+0r0003c004p000d09h43m53s338/316/316V:Init volt:316
+0r0003c004p000d09h43m54s334/316/316V:PROFILE: dga,hhr,hhr
+0r0003c004p000d09h43m54s339/316/316V:Initializing new Volume Profile
+0r0003c004p000d09h44m09s357/316/316V:Category: 1
+0r0003c004p000d09h44m10s359/316/316V:Category: 1-2
+0r0003c004p000d09h44m12s359/316/316V:Category: 2
+0r0003c004p000d09h44m20s359/316/316V:PLAY LB-2_fz02ma8nab_d @VOL=03 @Volt=316
+0r0003c004p000d09h44m33s359/316/316V:PLAYED LB-2_fz02ma8nab_d 0013/0422sec @VOL=03 @Volt=316
+
+0r0003c004p000d09h44m33s316/316/316V:PLAY LB-2_x6g9tv0p3e_m @VOL=03 @Volt=316
+0r0003c004p000d09h47m58s359/316/316V:PLAYED LB-2_x6g9tv0p3e_m 0205/0204sec @VOL=03 @Volt=316-Ended
+
+0r0003c004p000d09h57m45s350/309/306V:PLAYING VOLTAGE DROP: 0.06v in 0002 sec
+0r0003c004p000d09h57m45s309/309/309V:VOLTAGE DROP RATE: 030
+0r0003c004p000d09h57m45s309/309/309V:v309,MV10,C03
+0r0003c004p000d10h00m42s352/309/306V:Halting
+Replacing missing version file.

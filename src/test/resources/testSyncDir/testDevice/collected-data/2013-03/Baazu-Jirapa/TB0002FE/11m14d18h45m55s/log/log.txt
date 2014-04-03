@@ -1,0 +1,51 @@
+
+---------------------------------------------------
+Serial#:TB0002FE
+Clock:0r0000c001p000d02h04m39s
+0r0000c001p000d02h04m39s342/325/252V:setRTCalarm(0,0,0)
+0r0000c001p000d02h04m39s325/325/325V:set ALM 0000h00m00s
+0r0000c001p000d02h04m40s352/325/325V:Cannot open a://system/config.bin
+Set Clock:0r0000c001p000d00h01m00s (time and/or date reset by *.rtc file)
+Location:Baazu-Jirapa
+Version:v1.83r1059
+Reflashes:0003  (3988 words remaining)
+Package:2013-03  Cycle:0000  Rotation:0  Period:0001  Powered Days:0000
+Debug:Normal
+Inspect triggered
+Apparently ABNORMAL shutdown (no or corrupt config.bin)
+0r0000c001p000d00h01m00s347/325/325V:Init volt:325
+0r0000c001p000d00h01m00s347/325/325V:PROFILE: dga,hhr,hhr
+0r0000c001p000d00h01m00s349/325/325V:Initializing new Volume Profile
+0r0000c001p000d00h01m05s376/325/325V:PAUSED
+0r0000c001p000d00h01m18s357/321/321V:PAUSED VOLTAGE DROP: 0.04v in 136 sec
+0r0000c001p000d00h01m18s321/321/321V:VOLTAGE DROP RATE: 000
+0r0000c001p000d00h01m18s316/316/316V:SHUTTING DOWN
+X�1169cI53p-O�d01h47m50s000/191/252V:v191,MV01,C00
+
+---------------------------------------------------
+Serial#:TB0002FE
+Clock:0r0000c002p-O'd01h47m50s
+0r0000c000p000d01h47m54s000/290/252V:v290,MV09,C00
+
+---------------------------------------------------
+Serial#:TB0002FE
+Clock:0r0001c002p-O'd01h47m54s
+0r0001c002p-O�d01h47m54s307/290/290V:setRTCalarm(0,0,0)
+0r0001c002p-O'd01h47m54s290/290/290V:set ALM 0000h00m00s
+0r0001c002p-O�d01h47m55s317/290/290V:Cannot open a://system/config.bin
+Location:Baazu-Jirapa
+Version:v1.83r1059
+Reflashes:0003  (3981 words remaining)
+Package:2013-03  Cycle:0001  Rotation:0  Period:0002  Powered Days:-+'*
+Debug:Normal
+Apparently ABNORMAL shutdown (no or corrupt config.bin)
+0r0001c002p-O�d01h47m55s312/290/290V:Init volt:290
+0r0001c002p-O�d01h47m55s312/290/290V:PROFILE: dga,hhr,hhr
+0r0001c002p-O'd01h47m55s316/290/290V:Initializing new Volume Profile
+0r0001c002p-O�d01h47m58s351/290/290V:Louder:Vol=04 Volt=290
+0r0001c002p-O�d01h48m01s357/290/290V:Category: 1
+0r0001c002p-O�d01h48m02s365/290/290V:PLAY H_0200_6A0564FF @VOL=04 @Volt=290
+0r0001c002p-O�d01h48m03s357/290/290V:PLAYED H_0200_6A0564FF 0001/0818sec @VOL=04 @Volt=290
+0r0001c002p-O'd01h48m22s290/290/290V:SHUTTING DOWN
+��1169cI52p-O�d01h31m50s000/196/252V:v196,MV01,C00
+

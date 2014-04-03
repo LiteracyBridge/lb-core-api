@@ -38,12 +38,40 @@ public class DirectoryIterator {
 
   public static final String MANIFEST_FILE_NAME = "StatsPackageManifest.json";
 
+  public static final String TBLOADER_LOG_DIR                 = "logs";
   public static final String TBDATA_DIR_V2                    = "tbdata";
   public static final String UPDATE_ROOT_V1                   = "collected-data";
   public static final String DEVICE_OPERATIONS_DIR_ARCHIVE_V2 = "operations";
 
   public static final ObjectMapper mapper = new ObjectMapper();
 
+  public static File getManifestFile(File root) {
+    return new File(root, MANIFEST_FILE_NAME);
+  }
+
+  public static File getTbDataDir(File root, String device, DirectoryFormat format) {
+    File retVal;
+
+    if (format == DirectoryFormat.Sync) {
+      retVal = new File(root, FsUtils.FsAgnostify(device + "/" + UPDATE_ROOT_V1));
+    } else {
+      retVal = new File(root, FsUtils.FsAgnostify(DEVICE_OPERATIONS_DIR_ARCHIVE_V2 + "/" + TBDATA_DIR_V2 + "/" + device));
+    }
+
+    return retVal;
+  }
+
+  public static File getTbLoaderLogFileDir(File root, String device, DirectoryFormat format) {
+    File retVal;
+
+    if (format == DirectoryFormat.Sync) {
+      retVal = new File(root, FsUtils.FsAgnostify(device + "/" + UPDATE_ROOT_V1 + "/" + TBLOADER_LOG_DIR));
+    } else {
+      retVal = new File(root, FsUtils.FsAgnostify(DEVICE_OPERATIONS_DIR_ARCHIVE_V2 + "/" + TBLOADER_LOG_DIR + "/" + device));
+    }
+
+    return retVal;
+  }
 
   public final boolean         strict;
   public final File            root;
@@ -59,9 +87,10 @@ public class DirectoryIterator {
 
 
     StatsPackageManifest manifest = null;
-    File manifestFile = new File(root, MANIFEST_FILE_NAME);
+    File manifestFile = getManifestFile(root);
     if (manifestFile.exists()) {
-      manifest = readInManifest(manifestFile);
+      manifest = readInManifest(manifestFile, format, strict);
+      format = DirectoryFormat.fromVersion(manifest.formatVersion);
     } else {
       if (format == null) {
         if (strict) {
@@ -77,7 +106,7 @@ public class DirectoryIterator {
     process(manifest, callbacks);
   }
 
-  protected StatsPackageManifest readInManifest(File manifestFile) throws IOException {
+  public static StatsPackageManifest readInManifest(File manifestFile, DirectoryFormat format, boolean strict) throws IOException {
 
     StatsPackageManifest manifest = mapper.readValue(manifestFile, StatsPackageManifest.class);
     DirectoryFormat manifestFormat = DirectoryFormat.fromVersion(manifest.formatVersion);
@@ -132,17 +161,16 @@ public class DirectoryIterator {
 
           if (processDevice) {
             if (!deviceAlreadyProcessed) {
-              File  tbdataDir;
+              File  tbdataDir = getTbDataDir(root, currDevice, format);
+              if (!tbdataDir.exists()) {
+                throw new IllegalArgumentException("Malformed directory structure.  The operations portion is not properly setup: " + tbdataDir.getPath() + " does not exist.");
+              }
+
               if (format == DirectoryFormat.Sync) {
-                tbdataDir = new File(root, FsUtils.FsAgnostify(currDevice + "/" + UPDATE_ROOT_V1));
                 for (File potential : tbdataDir.listFiles((FilenameFilter) new RegexFileFilter(TBDATA_PATTERN))) {
                   callbacks.processTbDataFile(potential);
                 }
               } else {
-                tbdataDir = new File(root, FsUtils.FsAgnostify(DEVICE_OPERATIONS_DIR_ARCHIVE_V2 + "/" + TBDATA_DIR_V2 + "/" + currDevice));
-                if (!tbdataDir.exists()) {
-                  throw new IllegalArgumentException("Malformed archive directory.  The operations portion is not properly setup: " + tbdataDir.getPath() + " does not exist.");
-                }
                 for (File potential : tbdataDir.listFiles((FilenameFilter) new RegexFileFilter(TBDATA_PATTERN_V2))) {
                   callbacks.processTbDataFile(potential);
                 }
