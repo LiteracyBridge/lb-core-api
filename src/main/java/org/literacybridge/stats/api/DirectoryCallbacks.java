@@ -9,6 +9,12 @@ import java.io.IOException;
 /**
  * Interface defining the callbacks that a DirectoryIterator will use as it iterates through
  * a stats update file.
+ *
+ * WINDOWS + OSX/LINUX BEHAVIOUR DIFFERENCES:
+ *   Windows does not like empty directories, so there are cases where you can get different behaviour between the
+ *   two if you have a directory structure with empty directories.  For instance, if you had a device1/2014-03/village3
+ *   directory that was empty, you WOULD get a startVillage call for village3 on Linux or OSX, but WOULD NOT get a startVillage
+ *   call for village3 on Windows.
  */
 public interface DirectoryCallbacks {
 
