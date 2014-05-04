@@ -63,12 +63,12 @@ public class FilteringProcessor implements DirectoryCallbacks {
   }
 
   @Override
-  public void processTbLoaderLogFile(File tbdataFile) throws IOException {
-    callbacks.processTbLoaderLogFile(tbdataFile);
+  public void processTbLoaderLogFile(File logFile) throws IOException {
+    callbacks.processTbLoaderLogFile(logFile);
   }
 
   @Override
-  public boolean startDeviceDeployment(DeploymentPerDevice deploymentPerDevice, DeploymentId deploymentId)
+  public boolean startDeviceDeployment(DeploymentPerDevice deploymentPerDevice)
       throws Exception {
 
     if (allowedDevice != null && !allowedDevice.equalsIgnoreCase(deploymentPerDevice.device)) {
@@ -79,7 +79,7 @@ public class FilteringProcessor implements DirectoryCallbacks {
       return false;
     }
 
-    return callbacks.startDeviceDeployment(deploymentPerDevice, deploymentId);
+    return callbacks.startDeviceDeployment(deploymentPerDevice);
   }
 
   @Override

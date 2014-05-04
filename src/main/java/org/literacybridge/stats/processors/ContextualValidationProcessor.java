@@ -1,6 +1,5 @@
 package org.literacybridge.stats.processors;
 
-import org.literacybridge.stats.model.DeploymentId;
 import org.literacybridge.stats.model.DeploymentPerDevice;
 import org.literacybridge.stats.model.validation.InvalidDeploymentId;
 import org.literacybridge.stats.model.validation.InvalidTalkingBookId;
@@ -23,13 +22,13 @@ public class ContextualValidationProcessor extends ValidatingProcessor {
   }
 
   @Override
-  public boolean startDeviceDeployment(DeploymentPerDevice deploymentPerDevice, DeploymentId deploymentId)
+  public boolean startDeviceDeployment(DeploymentPerDevice deploymentPerDevice)
       throws Exception {
     if (!deploymentIds.contains(deploymentPerDevice.deployment)) {
       validationErrors.add(new InvalidDeploymentId(deploymentPerDevice.deployment));
     }
 
-    return super.startDeviceDeployment(deploymentPerDevice, deploymentId);
+    return super.startDeviceDeployment(deploymentPerDevice);
   }
 
   @Override

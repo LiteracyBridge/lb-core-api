@@ -72,9 +72,9 @@ public class ArchiveMerger extends AbstractDirectoryProcessor{
   }
 
   @Override
-  public boolean startDeviceDeployment(DeploymentPerDevice deploymentPerDevice, DeploymentId deploymentId)
+  public boolean startDeviceDeployment(DeploymentPerDevice deploymentPerDevice)
       throws Exception {
-    super.startDeviceDeployment(deploymentPerDevice, deploymentId);
+    super.startDeviceDeployment(deploymentPerDevice);
 
     File srcDir = deploymentPerDevice.getRoot(currRoot, format);
     File destDir = deploymentPerDevice.getRoot(dest, format);
@@ -100,11 +100,11 @@ public class ArchiveMerger extends AbstractDirectoryProcessor{
   }
 
   @Override
-  public void processTbLoaderLogFile(File tbdataFile) throws IOException {
+  public void processTbLoaderLogFile(File logFile) throws IOException {
     File destDir = DirectoryIterator.getTbLoaderLogFileDir(dest, operationalDevice, format);
-    File destFile = new File(destDir, tbdataFile.getName());
+    File destFile = new File(destDir, logFile.getName());
 
-    FileInputStream fis = new FileInputStream(tbdataFile);
+    FileInputStream fis = new FileInputStream(logFile);
     FileOutputStream fos = new FileOutputStream(destFile);
 
     IOUtils.copy(fis, fos);

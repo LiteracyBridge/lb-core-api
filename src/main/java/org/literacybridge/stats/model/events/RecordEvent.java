@@ -5,11 +5,7 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 
 /**
- * Created with IntelliJ IDEA.
- * User: willpugh
- * Date: 2/4/14
- * Time: 12:08 PM
- * To change this template use File | Settings | File Templates.
+ * Defines an event caused by a user recording a piece of content.
  */
 @Entity
 @Table(name = "recordevents")

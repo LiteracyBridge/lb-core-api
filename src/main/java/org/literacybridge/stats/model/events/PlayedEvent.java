@@ -5,15 +5,7 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 
 /**
- * Uniqueness
- * year
- * updateInYear
- * talkingBookId
- * rotation
- * cycle
- * period
- * daysInPeriod
- * timeInDay
+ * Describes an event caused by someone playing a peice of content.
  */
 
 @Entity

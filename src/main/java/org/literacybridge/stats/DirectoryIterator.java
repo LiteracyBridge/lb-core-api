@@ -193,7 +193,7 @@ public class DirectoryIterator {
           throw new IllegalArgumentException("Illegal deployment: " + deploymentId);
         }
 
-        if (callbacks.startDeviceDeployment(deploymentPerDevice, deploymentId)) {
+        if (callbacks.startDeviceDeployment(deploymentPerDevice)) {
           processDeviceDeployment(deploymentId, deploymentPerDevice.getRoot(root, format), callbacks);
           callbacks.endDeviceDeployment();
         }

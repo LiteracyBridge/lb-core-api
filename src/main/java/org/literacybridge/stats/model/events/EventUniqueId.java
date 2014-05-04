@@ -8,6 +8,9 @@ import java.io.Serializable;
 import java.sql.Time;
 
 /**
+ * All the fields that go into uniquifying an event.  Since, we want events population to be
+ * idempotent, it is important to use unique identifiers that are reproducible.  Since, all
+ * these fields come from the logs, they are reproducible.
  */
 @Embeddable
 public class EventUniqueId implements Serializable {

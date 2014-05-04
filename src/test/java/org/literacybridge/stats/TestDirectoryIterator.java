@@ -44,7 +44,7 @@ public class TestDirectoryIterator {
     DeploymentPerDevice deploymentPerDevice = new DeploymentPerDevice("2013-03", "device1");
     DeploymentId deploymentId = new DeploymentId((short)2013, (short)3, "2013-03");
 
-    expect(callbacks.startDeviceDeployment(eq(deploymentPerDevice), eq(deploymentId))).andReturn(true);
+    expect(callbacks.startDeviceDeployment(eq(deploymentPerDevice))).andReturn(true);
     expect(callbacks.startVillage("village1")).andReturn(true);
     expect(callbacks.startTalkingBook("TB1")).andReturn(true);
     callbacks.processSyncDir(eq(SyncDirId.parseSyncDir(deploymentId, "7m15d17h1m50s")),
@@ -67,7 +67,7 @@ public class TestDirectoryIterator {
     deploymentPerDevice = new DeploymentPerDevice("2013-04", "device1");
     deploymentId = new DeploymentId((short)2013, (short)4, "2013-04");
 
-    expect(callbacks.startDeviceDeployment(eq(deploymentPerDevice), eq(deploymentId))).andReturn(true);
+    expect(callbacks.startDeviceDeployment(eq(deploymentPerDevice))).andReturn(true);
     expect(callbacks.startVillage("village1")).andReturn(true);
     expect(callbacks.startTalkingBook("TB1")).andReturn(true);
     callbacks.processSyncDir(eq(SyncDirId.parseSyncDir(deploymentId, "8m15d17h1m50s")),
@@ -93,7 +93,7 @@ public class TestDirectoryIterator {
 
     deploymentPerDevice = new DeploymentPerDevice("2013-03", "device2");
     deploymentId = new DeploymentId((short)2013, (short)3, "2013-03");
-    expect(callbacks.startDeviceDeployment(eq(deploymentPerDevice), eq(deploymentId))).andReturn(true);
+    expect(callbacks.startDeviceDeployment(eq(deploymentPerDevice))).andReturn(true);
     expect(callbacks.startVillage("village1")).andReturn(true);
     expect(callbacks.startTalkingBook("TB5")).andReturn(true);
     callbacks.processSyncDir(eq(SyncDirId.parseSyncDir(deploymentId, "7m15d17h10m50s")), eq(new File(deploymentPerDevice.getRoot(root, format), FsUtils.FsAgnostify("village1/TB5/7m15d17h10m50s"))));
@@ -108,7 +108,7 @@ public class TestDirectoryIterator {
     deploymentPerDevice = new DeploymentPerDevice("2013-04", "device2");
     deploymentId = new DeploymentId((short)2013, (short)4, "2013-04");
 
-    expect(callbacks.startDeviceDeployment(eq(deploymentPerDevice), eq(deploymentId))).andReturn(true);
+    expect(callbacks.startDeviceDeployment(eq(deploymentPerDevice))).andReturn(true);
     expect(callbacks.startVillage("village1")).andReturn(true);
     expect(callbacks.startTalkingBook("TB5")).andReturn(true);
     callbacks.endTalkingBook();

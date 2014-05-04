@@ -16,6 +16,7 @@ import java.util.Comparator;
 public class DeploymentPerDevice {
   public final String deployment;
   public final String device;
+  public final DeploymentId deploymentId;
 
 
   public static final Comparator<DeploymentPerDevice> ORDER_BY_DEVICE = new Comparator<DeploymentPerDevice>() {
@@ -49,6 +50,7 @@ public class DeploymentPerDevice {
   public DeploymentPerDevice(String deployment, String device) {
     this.deployment = deployment;
     this.device = device;
+    this.deploymentId = DeploymentId.parseContentUpdate(deployment);
   }
 
   public File getRoot(File basePath, DirectoryFormat format) {

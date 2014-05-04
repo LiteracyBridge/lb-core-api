@@ -5,6 +5,7 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 
 /**
+ * Defines an event by someone filling out a survey.
  */
 @Entity
 @Table(name = "surveyevents")

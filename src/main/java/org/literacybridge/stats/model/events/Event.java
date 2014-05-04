@@ -6,6 +6,7 @@ import javax.persistence.*;
 import java.io.Serializable;
 
 /**
+ * Base class for events that are pulled out of the Talking Book logs
  */
 @Entity
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)

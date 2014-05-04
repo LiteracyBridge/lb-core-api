@@ -52,12 +52,12 @@ abstract public class AbstractDirectoryProcessor implements DirectoryCallbacks {
   }
 
   @Override
-  public void processTbLoaderLogFile(File tbdataFile)  throws IOException {
+  public void processTbLoaderLogFile(File logFile)  throws IOException {
 
   }
 
   @Override
-  public boolean startDeviceDeployment(DeploymentPerDevice deploymentPerDevice, DeploymentId  deploymentId) throws Exception {
+  public boolean startDeviceDeployment(DeploymentPerDevice deploymentPerDevice) throws Exception {
     currDeploymentPerDevice = deploymentPerDevice;
     this.deploymentId = deploymentId;
     return true;
