@@ -58,8 +58,8 @@ public class FilteringProcessor implements DirectoryCallbacks {
   }
 
   @Override
-  public void processTbDataFile(File tbdataFile) throws IOException {
-    callbacks.processTbDataFile(tbdataFile);
+  public void processTbDataFile(File tbdataFile, boolean includesHeaders) throws IOException {
+    callbacks.processTbDataFile(tbdataFile, includesHeaders);
   }
 
   @Override

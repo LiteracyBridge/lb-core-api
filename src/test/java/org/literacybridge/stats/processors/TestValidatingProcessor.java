@@ -37,7 +37,7 @@ public class TestValidatingProcessor {
                                                                         @Override
                                                                         public boolean apply(
                                                                             @Nullable ValidationError input) {
-                                                                          return input.errorId != ValidationError.INVALID_SYNC_DIR_FORMAT;
+                                                                          return input.errorId != ValidationError.INVALID_SYNC_DIR_PATH;
                                                                         }
                                                                       });
 
@@ -65,7 +65,7 @@ public class TestValidatingProcessor {
     TestCase.assertEquals(ValidationError.INVALID_DATA_IN_TBDATA, currError.errorId);
 
     TbDataHasInvalidProperties  invalidProperties = (TbDataHasInvalidProperties) currError;
-    TestCase.assertEquals(2, invalidProperties.incorrectFilePropertyValues.size());
+    TestCase.assertEquals(1, invalidProperties.incorrectFilePropertyValues.size());
 
     int invalidDir = 0;
     int noDeviceInManifest = 0;
@@ -78,6 +78,8 @@ public class TestValidatingProcessor {
       } else if (currError.errorId == ValidationError.MANIFEST_DOES_NOT_CONTAIN_DEVICE) {
         noDeviceInManifest++;
       } else if (currError.errorId == ValidationError.NO_MATCHING_TBDATA_ENTRY) {
+        noTbEntryForDir++;
+      } else if (currError.errorId == ValidationError.UNMATCHED_TBDATA_ENTRIES) {
         noTbEntryForDir++;
       } else {
         TestCase.fail("Unexpected error message");

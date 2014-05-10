@@ -67,6 +67,7 @@ public class TestSyncDirId {
   }
 
 
+  /*
   @Test
   public void testComparingIds() {
 
@@ -103,6 +104,6 @@ public class TestSyncDirId {
     }
 
   }
-
+  */
 
 }

@@ -63,7 +63,7 @@ public class DeploymentPerDevice {
   }
 
   public File getArchiveRoot(File basePath) {
-    return new File(basePath, FsUtils.FsAgnostify(deployment + "/" + device));
+    return new File(basePath, FsUtils.FsAgnostify(DirectoryIterator.TALKING_BOOK_ROOT_V2 + "/" + deployment + "/" + device));
   }
 
 

@@ -47,7 +47,7 @@ abstract public class AbstractDirectoryProcessor implements DirectoryCallbacks {
   }
 
   @Override
-  public void processTbDataFile(File tbdataFile) throws IOException {
+  public void processTbDataFile(File tbdataFile, boolean includesHeaders) throws IOException {
 
   }
 

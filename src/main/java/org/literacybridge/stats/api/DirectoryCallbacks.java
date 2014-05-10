@@ -48,9 +48,10 @@ public interface DirectoryCallbacks {
    * where the device would have been identified.
    *
    * @param tbdataFile the file being visited
+   * @param includesHeaders whether the first line of the TbData file is header names.
    * @throws IOException
    */
-  void processTbDataFile(@Nonnull File tbdataFile) throws IOException;
+  void processTbDataFile(@Nonnull File tbdataFile, boolean includesHeaders) throws IOException;
 
   /**
    * Called when operational logs are being visited, this will have already been preceeded by a startDeviceOperationalData,

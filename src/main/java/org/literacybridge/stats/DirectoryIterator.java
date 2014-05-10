@@ -32,16 +32,21 @@ public class DirectoryIterator {
   public static final Pattern TBDATA_PATTERN       = Pattern.compile("tbData-(\\d+)-(\\d+)-(\\d+).*");
   public static final Pattern SYNC_TIME_PATTERN_V1 = Pattern.compile("(\\d+)m(\\d+)d(\\d+)h(\\d+)m(\\d+)s");
   public static final Pattern SYNC_TIME_PATTERN_V2 = Pattern.compile("(\\d+)y(\\d+)m(\\d+)d(\\d+)h(\\d+)m(\\d+)s-(.*)");
+  public static final Pattern SYNC_TIME_PATTERN_V2_NO_DEVICE_ID = Pattern.compile("(\\d+)y(\\d+)m(\\d+)d(\\d+)h(\\d+)m(\\d+)s");
 
-  public static final Pattern TBDATA_PATTERN_V2 = Pattern.compile("tbData-(\\d+)-(\\d+)-(\\d+).csv");
 
+  public static final Pattern TBDATA_PATTERN_V2 = Pattern.compile("tbData-v(\\d+)-(\\d+)y(\\d+)m(\\d+)d-(.*).csv");
+
+  //tbData-v00-2014y05m02d-9d8839de.csv
 
   public static final String MANIFEST_FILE_NAME = "StatsPackageManifest.json";
 
   public static final String TBLOADER_LOG_DIR                 = "logs";
   public static final String TBDATA_DIR_V2                    = "tbdata";
   public static final String UPDATE_ROOT_V1                   = "collected-data";
-  public static final String DEVICE_OPERATIONS_DIR_ARCHIVE_V2 = "operations";
+  public static final String DEVICE_OPERATIONS_DIR_ARCHIVE_V2 = "OperationalData";
+  public static final String TALKING_BOOK_ROOT_V2             = "TalkingBookData";
+
 
   public static final ObjectMapper mapper = new ObjectMapper();
 
@@ -55,7 +60,7 @@ public class DirectoryIterator {
     if (format == DirectoryFormat.Sync) {
       retVal = new File(root, FsUtils.FsAgnostify(device + "/" + UPDATE_ROOT_V1));
     } else {
-      retVal = new File(root, FsUtils.FsAgnostify(DEVICE_OPERATIONS_DIR_ARCHIVE_V2 + "/" + TBDATA_DIR_V2 + "/" + device));
+      retVal = new File(root, FsUtils.FsAgnostify(DEVICE_OPERATIONS_DIR_ARCHIVE_V2 + "/" + device + "/" + TBDATA_DIR_V2 ));
     }
 
     return retVal;
@@ -67,7 +72,7 @@ public class DirectoryIterator {
     if (format == DirectoryFormat.Sync) {
       retVal = new File(root, FsUtils.FsAgnostify(device + "/" + UPDATE_ROOT_V1 + "/" + TBLOADER_LOG_DIR));
     } else {
-      retVal = new File(root, FsUtils.FsAgnostify(DEVICE_OPERATIONS_DIR_ARCHIVE_V2 + "/" + TBLOADER_LOG_DIR + "/" + device));
+      retVal = new File(root, FsUtils.FsAgnostify(DEVICE_OPERATIONS_DIR_ARCHIVE_V2 + "/" + device + "/" + TBLOADER_LOG_DIR ));
     }
 
     return retVal;
@@ -168,11 +173,11 @@ public class DirectoryIterator {
 
               if (format == DirectoryFormat.Sync) {
                 for (File potential : tbdataDir.listFiles((FilenameFilter) new RegexFileFilter(TBDATA_PATTERN))) {
-                  callbacks.processTbDataFile(potential);
+                  callbacks.processTbDataFile(potential, false);
                 }
               } else {
                 for (File potential : tbdataDir.listFiles((FilenameFilter) new RegexFileFilter(TBDATA_PATTERN_V2))) {
-                  callbacks.processTbDataFile(potential);
+                  callbacks.processTbDataFile(potential, true);
                 }
               }
               deviceAlreadyProcessed = true;
@@ -251,9 +256,14 @@ public class DirectoryIterator {
         }
       }
     } else {
-      for (File deploymentDir : root.listFiles((FilenameFilter) new RegexFileFilter(UPDATE_PATTERN))) {
-        for (File device : deploymentDir.listFiles((FileFilter) DirectoryFileFilter.DIRECTORY)) {
-          retVal.add(new DeploymentPerDevice(deploymentDir.getName(), device.getName()));
+      File talkingBookData = new File(root, TALKING_BOOK_ROOT_V2);
+
+      for (File deploymentDir : talkingBookData.listFiles((FileFilter) DirectoryFileFilter.DIRECTORY)) {
+        if (UPDATE_PATTERN.matcher(deploymentDir.getName()).matches() ||
+            "UNKNOWN".equalsIgnoreCase(deploymentDir.getName())) {
+          for (File device : deploymentDir.listFiles((FileFilter) DirectoryFileFilter.DIRECTORY)) {
+            retVal.add(new DeploymentPerDevice(deploymentDir.getName(), device.getName()));
+          }
         }
       }
     }

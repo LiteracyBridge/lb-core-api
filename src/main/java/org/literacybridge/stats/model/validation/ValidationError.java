@@ -26,4 +26,12 @@ public class ValidationError {
     this.errorMessage = errorMessage;
     this.errorId = errorId;
   }
+
+  @Override
+  public String toString() {
+    return "ValidationError{" +
+        "errorMessage='" + errorMessage + '\'' +
+        ", errorId=" + errorId +
+        '}';
+  }
 }

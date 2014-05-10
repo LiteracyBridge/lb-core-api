@@ -90,7 +90,7 @@ public class ArchiveMerger extends AbstractDirectoryProcessor{
   }
 
   @Override
-  public void processTbDataFile(File tbdataFile) throws IOException {
+  public void processTbDataFile(File tbdataFile, boolean includesHeaders) throws IOException {
     FileInputStream fis = new FileInputStream(tbdataFile);
 
     File outputFile = DirectoryIterator.getTbDataDir(dest, operationalDevice, format);

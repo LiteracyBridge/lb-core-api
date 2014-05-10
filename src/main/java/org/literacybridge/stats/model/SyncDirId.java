@@ -3,19 +3,40 @@ package org.literacybridge.stats.model;
 import org.joda.time.LocalDateTime;
 import org.literacybridge.stats.DirectoryIterator;
 
+import java.util.Comparator;
 import java.util.regex.Matcher;
 
 /**
  */
-public class SyncDirId implements Comparable<SyncDirId>{
+public class SyncDirId /*implements Comparable<SyncDirId>*/{
+
+  public static final Comparator<SyncDirId> TIME_COMPARATOR = new Comparator<SyncDirId>() {
+    @Override
+    public int compare(SyncDirId o1, SyncDirId o2) {
+      if (o1 == o2) { return 0; }
+      if (o1.dateTime==null && o2.dateTime!=null) {
+        return -1;
+      }
+
+      if (o2.dateTime == null && o1.dateTime != null) {
+        return 1;
+      }
+
+      int retVal = o1.dateTime.compareTo(o2.dateTime);
+      if (retVal == 0) {
+        retVal = o1.uniquifier.compareTo(o2.uniquifier);
+      }
+      return retVal;
+    }
+  };
 
   public static final int SYNC_VERSION_1 = 1;
   public static final int SYNC_VERSION_2 = 2;
 
-  public final LocalDateTime  dateTime;
-  public final String         dirName;
-  public final String         uniquifier;
-  public final int            version;
+  public final LocalDateTime dateTime;
+  public final String        dirName;
+  public final String        uniquifier;
+  public final int           version;
 
 
   public static SyncDirId parseSyncDir(DeploymentId deploymentId, String syncDirName) {
@@ -109,6 +130,7 @@ public class SyncDirId implements Comparable<SyncDirId>{
     return dirName != null ? dirName.hashCode() : 0;
   }
 
+  /*
   @Override
   public int compareTo(SyncDirId o) {
     if (o == this) { return 0; }
@@ -126,7 +148,7 @@ public class SyncDirId implements Comparable<SyncDirId>{
     }
     return retVal;
   }
-
+  */
   @Override
   public String toString() {
     return "SyncDirId{" +
