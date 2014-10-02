@@ -50,6 +50,20 @@ public class DirectoryIterator {
 
   public static final ObjectMapper mapper = new ObjectMapper();
 
+    /**
+     * THere are some zip files that are not properly formed, and start with
+     *   collected-data/*.  This will check to see if this is one of those zips.
+     * @param root the root directory the zip was expanded to
+     * @return the proper root directory to use for processing
+     */
+  public static File rootInFunnyZip(File root) {
+      File  collectedDataFile = new File(root, "collected-data");
+      if (collectedDataFile.exists())
+          return collectedDataFile;
+
+      return root;
+  }
+
   public static File getManifestFile(File root) {
     return new File(root, MANIFEST_FILE_NAME);
   }
@@ -83,7 +97,7 @@ public class DirectoryIterator {
   public       DirectoryFormat format;
 
   public DirectoryIterator(File root, DirectoryFormat format, boolean strict) {
-    this.root = root;
+    this.root = rootInFunnyZip(root);
     this.strict = strict;
     this.format = format;
   }

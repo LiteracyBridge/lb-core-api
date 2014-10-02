@@ -26,6 +26,7 @@ public class ValidatingProcessor extends AbstractDirectoryProcessor {
 
   protected static final Map<String, Integer> V1_TB_MAP = ImmutableMap.<String, Integer>builder()
                                                                .put("UPDATE_DATE_TIME", 0)
+                                                               .put("IN-SYNCH-DIR", 0)
                                                                .put("IN-SN", 2)
                                                                .put("OUT-SN", 8)
                                                                .put("IN-DEPLOYMENT", 4)
@@ -123,7 +124,7 @@ public class ValidatingProcessor extends AbstractDirectoryProcessor {
     String outVillage = line[10];
     */
 
-    String syncDirName = line[headerToIndex.get("UPDATE_DATE_TIME")];
+    String syncDirName = line[headerToIndex.get("IN-SYNCH-DIR")];
     String inTalkingBook = line[headerToIndex.get("IN-SN")];
     String outTalkingBook = line[headerToIndex.get("OUT-SN")];
 
