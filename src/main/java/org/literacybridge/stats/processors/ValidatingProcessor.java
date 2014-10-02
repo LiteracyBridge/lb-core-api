@@ -112,18 +112,6 @@ public class ValidatingProcessor extends AbstractDirectoryProcessor {
       return;
     }
     //Get the syncDir + the deployment ID for this entry
-    /*
-    String syncDirName = line[0];
-    String inTalkingBook = line[2];
-    String outTalkingBook = line[8];
-
-    String inDeploymentId = line[4];
-    String outDeploymentId = line[9];
-
-    String inVillage = line[5];
-    String outVillage = line[10];
-    */
-
     String syncDirName = line[headerToIndex.get("IN-SYNCH-DIR")];
     String inTalkingBook = line[headerToIndex.get("IN-SN")];
     String outTalkingBook = line[headerToIndex.get("OUT-SN")];
