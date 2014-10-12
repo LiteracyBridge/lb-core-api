@@ -17,8 +17,10 @@ import static org.literacybridge.stats.formats.FirmwareConstants.*;
 public class StatsFile {
 
   public static final int MsgIDLength = 20;
+  public static final int SRNMaxLength = 12;
+  public static final int NumberOfStatsPerMsg = 6;
 
-  public static final int StartSequence = 0x12358D15;
+  public static final int Version = 0;
 
   public static StatsFile read(InputStream is) throws IOException {
 
@@ -29,19 +31,24 @@ public class StatsFile {
 
       //Get the first short to check for corruption
       int startSequence = byteBuffer.getInt();
-      if (startSequence != StartSequence) {
+      if (startSequence != Version) {
         throw new CorruptFileException(
-            "Start sequence for stream does not start with 0x8D15, so this file looks corrupt.");
+            "Version does not equal 0, so this file looks corrupt or is not compatible.");
       }
+
+      final byte[] SRNArray = new byte[SRNMaxLength * SizeOfChar];
+      byteBuffer.get(SRNArray);
+      final String SRN = decodeString(SRNArray);
 
       final byte[] msgIdArray = new byte[MsgIDLength * SizeOfChar];
       byteBuffer.get(msgIdArray);
       final String msgId = decodeString(msgIdArray);
 
-      int offsetToStats = byteStream.length - (6 * SizeOfInt);
+      int offsetToStats = byteStream.length - (NumberOfStatsPerMsg * SizeOfInt);
       byteBuffer.position(offsetToStats);
 
-      StatsFile retVal = new StatsFile(msgId,
+      StatsFile retVal = new StatsFile(SRN, 
+    		  						   msgId,
                                        byteBuffer.getInt(),
                                        byteBuffer.getInt(),
                                        byteBuffer.getInt(),
@@ -63,17 +70,21 @@ public class StatsFile {
 
   public static void write(StatsFile file, OutputStream outputStream) throws IOException {
     //Start Sequence + Message ID + the six stats counters.
-    final byte[] bytes = new byte[SizeOfInt + (MsgIDLength * SizeOfChar) + (6 * SizeOfInt)];
+	 
+	final byte[] bytes = new byte[SizeOfInt + (SRNMaxLength * SizeOfChar) + (MsgIDLength * SizeOfChar) + (NumberOfStatsPerMsg * SizeOfInt)];
     final ByteBuffer byteBuffer = ByteBuffer.wrap(bytes);
     byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
 
-    byteBuffer.putInt(StartSequence);
-
+    byteBuffer.putInt(Version);
+    byte[] SRNBytes = encodeString(file.SRN);
     byte[] messageBytes = encodeString(file.messageId);
-    int bytesToWrite = Math.min(messageBytes.length, MsgIDLength * SizeOfChar);
+    int bytesToWrite = Math.min(SRNBytes.length, SRNMaxLength * SizeOfChar);
+    byteBuffer.put(SRNBytes, 0, bytesToWrite);
+
+    bytesToWrite = Math.min(messageBytes.length, MsgIDLength * SizeOfChar);
     byteBuffer.put(messageBytes, 0, bytesToWrite);
 
-    int offsetToStats = bytes.length - (6 * SizeOfInt);
+    int offsetToStats = bytes.length - (NumberOfStatsPerMsg * SizeOfInt);
     byteBuffer.position(offsetToStats);
 
     byteBuffer.putInt(file.openCount);
@@ -86,6 +97,7 @@ public class StatsFile {
     outputStream.write(bytes);
   }
 
+  public final String SRN;			  // SerialNumber that is written into each file.
   public final String messageId;      // Message ID that is written into each file.
   public final int openCount;         // 10 seconds or longer play
   public final int completionCount;   // Finished whole recording (-Ended in log file)
@@ -94,9 +106,10 @@ public class StatsFile {
   public final int appliedCount;      // How many times did they say they would apply this content
   public final int uselessCount;      // How many times did they say this was not useful content
 
-  public StatsFile(String messageId, int openCount, int completionCount, int copyCount, int surveyCount,
+  public StatsFile(String SRN, String messageId, int openCount, int completionCount, int copyCount, int surveyCount,
                    int appliedCount, int uselessCount) {
-    this.messageId = messageId;
+	this.SRN = SRN;
+	this.messageId = messageId;
     this.openCount = openCount;
     this.completionCount = completionCount;
     this.copyCount = copyCount;
@@ -119,6 +132,7 @@ public class StatsFile {
     if (surveyCount != statsFile.surveyCount) return false;
     if (uselessCount != statsFile.uselessCount) return false;
     if (messageId != null ? !messageId.equals(statsFile.messageId) : statsFile.messageId != null) return false;
+    if (SRN != null ? !SRN.equals(statsFile.SRN) : statsFile.SRN != null) return false;
 
     return true;
   }
@@ -126,6 +140,7 @@ public class StatsFile {
   @Override
   public int hashCode() {
     int result = messageId != null ? messageId.hashCode() : 0;
+    result = 31 * result + SRN != null ? SRN.hashCode() : 0;
     result = 31 * result + openCount;
     result = 31 * result + completionCount;
     result = 31 * result + copyCount;

@@ -45,8 +45,10 @@ public class DirectoryProcessor extends AbstractDirectoryProcessor {
 
   public static final Pattern ARCHIVED_LOG_PATTERN = Pattern.compile("log_(.*).txt");
 
+  private static final String statExtension = ".stat";
+  
   //Stats files don't have any "."s in them (because they have no file extensions)
-  public static final Pattern STATS_FILE_PATTERN = Pattern.compile("([^.]+)");
+  public static final Pattern STATS_FILE_PATTERN = Pattern.compile("(.*)"+statExtension);
 
 
   private ProcessingContext currProcessingContext;
@@ -170,7 +172,7 @@ public class DirectoryProcessor extends AbstractDirectoryProcessor {
     }
 
     //Process all the Stats files
-    final File statDir = new File(new File(syncDir, "statistics"), "stats");
+    final File statDir = new File(syncDir, "statistics");
     if (statDir.canRead()) {
       if (statDir.isDirectory()) {
         final Iterator<File> statsFiles = FileUtils.iterateFiles(statDir, new RegexFileFilter(STATS_FILE_PATTERN),
@@ -221,7 +223,10 @@ public class DirectoryProcessor extends AbstractDirectoryProcessor {
       try {
         StatsFile statsFile = StatsFile.read(fis);
         for (TalkingBookDataProcessor callbacks : dataProcessorEventListeners) {
-          callbacks.processStatsFile(syncProcessingContext, file.getName(), statsFile);
+        	int delimeterPosition = file.getName().indexOf('^');
+        	String contentId = file.getName().substring(delimeterPosition+1,file.getName().length()-statExtension.length());
+        	String packageName = file.getName().substring(0,delimeterPosition);  // not used right now but should be checked against processing context     
+            callbacks.processStatsFile(syncProcessingContext, contentId, statsFile);
         }
       } catch (CorruptFileException e) {
         for (TalkingBookDataProcessor callbacks : dataProcessorEventListeners) {
@@ -249,7 +254,7 @@ public class DirectoryProcessor extends AbstractDirectoryProcessor {
     FlashData       retVal  = null;
     FileInputStream fis     = null;
     try {
-      if (flashDataFile.exists()) {
+      if (flashDataFile.exists() && flashDataFile.length() == 6708) {
         fis = new FileInputStream(flashDataFile);
         retVal = FlashData.parseFromStream(fis);
 
