@@ -16,7 +16,7 @@ import java.util.List;
  */
 public class NORmsgMap {
 
-  static protected final Logger logger = LoggerFactory.getLogger(NORrotation.class);
+  static protected final Logger logger = LoggerFactory.getLogger(NORmsgMap.class);
 
 
   private short totalMessages;
