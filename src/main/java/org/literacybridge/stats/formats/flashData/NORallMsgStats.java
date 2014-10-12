@@ -1,6 +1,8 @@
 package org.literacybridge.stats.formats.flashData;
 
 import org.literacybridge.stats.formats.FirmwareConstants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -17,10 +19,22 @@ import java.util.List;
  */
 public class NORallMsgStats {
 
+	static protected final Logger logger = LoggerFactory.getLogger(NORallMsgStats.class);
     static public NORallMsgStats parseFromBuffer(List<String> conentIdList, ByteBuffer byteBuffer) { return parseFromBuffer(conentIdList, byteBuffer, new NORallMsgStats()); }
 
     static public NORallMsgStats parseFromBuffer(List<String> conentIdList, ByteBuffer byteBuffer, NORallMsgStats allMsgStats) {
 
+    short structId = byteBuffer.getShort();
+    if (structId != FirmwareConstants.NOR_STRUCT_ID_ALL_MSGS) {
+      logger.error("Invalid struct ID.  Should be " + FirmwareConstants.NOR_STRUCT_ID_ALL_MSGS + " but is actually " + structId);
+    }
+
+    allMsgStats.profileOrder = byteBuffer.getShort();
+
+    byte[]  profileNameBuffer = new byte[FirmwareConstants.MAX_PROFILE_NAME_LENGTH * FirmwareConstants.SizeOfChar];
+    byteBuffer.get(profileNameBuffer);
+    allMsgStats.profileName = FirmwareConstants.decodeString(profileNameBuffer);     
+    
     allMsgStats.totalMessages = byteBuffer.getShort();
     allMsgStats.totalRotations = byteBuffer.getShort();
 
@@ -48,6 +62,8 @@ public class NORallMsgStats {
     return allMsgStats;
   }
 
+  short               profileOrder;
+  String              profileName;
   short               totalMessages;
   short               totalRotations;
   List<NORmsgStats[]> stats;
@@ -63,6 +79,21 @@ public class NORallMsgStats {
     return true;
   }
 
+  public short getProfileOrder() {
+	  return profileOrder;
+  }
+
+  public void setProfileOrder(short profileOrder) {
+	  this.profileOrder = profileOrder;
+  }
+  
+  public String getProfileName() {
+	  return profileName;
+  }
+
+  public void setProfileName(String profileName) {
+	  this.profileName = profileName;
+  }
 
   public short getTotalMessages() {
     return totalMessages;

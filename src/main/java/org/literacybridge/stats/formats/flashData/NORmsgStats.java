@@ -35,6 +35,7 @@ public class NORmsgStats {
     normsgStats.isEmpty =  (structId != FirmwareConstants.NOR_STRUCT_ID_MESSAGE_STATS);
     normsgStats.contentId = contentId;
     normsgStats.indexMsg = byteBuffer.getShort();
+    normsgStats.numberProfile = byteBuffer.getShort();
     normsgStats.numberRotation = byteBuffer.getShort();
     normsgStats.countStarted = byteBuffer.getShort();
     normsgStats.countQuarter = byteBuffer.getShort();
@@ -52,6 +53,7 @@ public class NORmsgStats {
   private boolean   isEmpty;
   private String    contentId;
   private short     indexMsg;
+  private short		numberProfile;
   private short     numberRotation;
   private short     countStarted;
   private short     countQuarter;
@@ -91,6 +93,14 @@ public class NORmsgStats {
 
   public void setIndexMsg(short indexMsg) {
     this.indexMsg = indexMsg;
+  }
+
+  public short getNumberProfile() {
+    return numberProfile;
+  }
+
+  public void setNumberProfile(short numberProfile) {
+	this.numberProfile = numberProfile;
   }
 
   public short getNumberRotation() {
@@ -215,6 +225,7 @@ public class NORmsgStats {
     if (countUseless != that.countUseless) return false;
     if (indexMsg != that.indexMsg) return false;
     if (isEmpty != that.isEmpty) return false;
+    if (numberProfile != that.numberProfile) return false;
     if (numberRotation != that.numberRotation) return false;
     if (totalSecondsPlayed != that.totalSecondsPlayed) return false;
     if (contentId != null ? !contentId.equals(that.contentId) : that.contentId != null) return false;
@@ -227,6 +238,7 @@ public class NORmsgStats {
     int result = (isEmpty ? 1 : 0);
     result = 31 * result + (contentId != null ? contentId.hashCode() : 0);
     result = 31 * result + (int) indexMsg;
+    result = 31 * result + (int) numberProfile;
     result = 31 * result + (int) numberRotation;
     result = 31 * result + (int) countStarted;
     result = 31 * result + (int) countQuarter;
@@ -244,6 +256,7 @@ public class NORmsgStats {
         .append("isEmpty", isEmpty)
         .append("contentId", contentId)
         .append("indexMsg", indexMsg)
+        .append("numberProfile", numberProfile)
         .append("numberRotation", numberRotation)
         .append("countStarted", countStarted)
         .append("countQuarter", countQuarter)

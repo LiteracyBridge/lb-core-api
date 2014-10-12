@@ -37,17 +37,17 @@ public class SystemData {
     byte[] serialNumberBytes          = new byte[FirmwareConstants.FIXED_SERIAL_NUMBER_SIZE * FirmwareConstants.SizeOfChar];
     byte[] updateNumberBytes          = new byte[FirmwareConstants.FIXED_UPDATE_NUMBER_SIZE * FirmwareConstants.SizeOfChar];
     byte[] locationNumberBytes        = new byte[FirmwareConstants.FIXED_LOCATION_SIZE * FirmwareConstants.SizeOfChar];
-    byte[] contentPackageNumberBytes  = new byte[FirmwareConstants.FIXED_CONTENT_PACKAGE_SIZE * FirmwareConstants.SizeOfChar];
+    byte[] imageNameNumberBytes  = new byte[FirmwareConstants.FIXED_IMAGE_NAME_SIZE * FirmwareConstants.SizeOfChar];
 
     byteBuffer.get(serialNumberBytes);
     byteBuffer.get(updateNumberBytes);
     byteBuffer.get(locationNumberBytes);
-    byteBuffer.get(contentPackageNumberBytes);
+    byteBuffer.get(imageNameNumberBytes);
 
     systemData.serialNumber   = FirmwareConstants.decodeString(serialNumberBytes).trim();
     systemData.updateNumber   = FirmwareConstants.decodeString(updateNumberBytes).trim();
     systemData.location       = FirmwareConstants.decodeString(locationNumberBytes).trim();
-    systemData.contentPackage = FirmwareConstants.decodeString(contentPackageNumberBytes).trim();
+    systemData.contentPackage = FirmwareConstants.decodeString(imageNameNumberBytes).trim();
 
     systemData.dayLastUpdated = byteBuffer.getShort();
     systemData.monthLastUpdated = byteBuffer.getShort();

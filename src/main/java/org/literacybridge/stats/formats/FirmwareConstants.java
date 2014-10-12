@@ -18,9 +18,10 @@ public class FirmwareConstants {
 
 
   //Constants for each structure's ID
-  public static final short SYSTEM_DATA_ID                  = 0;
+  public static final short SYSTEM_DATA_ID                  = 254;
   public static final short NOR_STRUCT_ID_MSG_MAP           = 1;
-  public static final short NOR_STRUCT_ID_MESSAGE_STATS     = 2;
+  public static final short NOR_STRUCT_ID_MESSAGE_STATS     = 13;
+  public static final short NOR_STRUCT_ID_ALL_MSGS			= 14;
   public static final short NOR_STRUCT_ID_NO_MESSAGE_STATS  = -2;
 
   public static final short NOR_STRUCT_ID_ROTATION          = 9;
@@ -30,14 +31,15 @@ public class FirmwareConstants {
   //Constants used for fixed size portions of the data structures.
   //These are defined the same way as the ones in the C-structures, and
   //are thus in terms of chars, not bytes.
-  public static final int FIXED_CONTENT_PACKAGE_SIZE= 10;
+  public static final int FIXED_IMAGE_NAME_SIZE		= 20;
   public static final int FIXED_LOCATION_SIZE       = 40;
-  public static final int FIXED_SERIAL_NUMBER_SIZE  = 10;
-  public static final int FIXED_UPDATE_NUMBER_SIZE  = 10;
+  public static final int FIXED_SERIAL_NUMBER_SIZE  = 12;
+  public static final int FIXED_UPDATE_NUMBER_SIZE  = 20;
   public static final int MAX_MESSAGE_ID_LENGTH     = 20;
-  public static final int MAX_TRACKED_MESSAGES      = 20;
+  public static final int MAX_TRACKED_MESSAGES      = 40;
   public static final int MAX_ROTATIONS             = 5;
-
+  public static final int MAX_PROFILE_NAME_LENGTH	= 20;
+  public static final int MAX_PROFILES	            = 2;
 
   /**
    * Decodes byte array that was written by the firmware into a Java String

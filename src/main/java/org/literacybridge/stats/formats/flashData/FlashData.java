@@ -1,9 +1,10 @@
 package org.literacybridge.stats.formats.flashData;
 
 import com.google.common.collect.ImmutableList;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.builder.ToStringBuilder;
-
+import org.literacybridge.stats.formats.FirmwareConstants;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -34,8 +35,10 @@ public class FlashData {
     flashData.systemData = SystemData.parseFromBuffer(byteBuffer);
     flashData.systemCounts = SystemCounts.parseFromBuffer(byteBuffer);
     flashData.msgMap = NORmsgMap.parseFromBuffer(byteBuffer);
+    // TODO: create array of msgStats[FirmwareConstants.MAX_PROFILES]
+    //      For now, we will only process the first profile since we will
+    //		only use one profile in 2014
     flashData.msgStats = NORallMsgStats.parseFromBuffer(flashData.getMsgMap().getMsgIdMap(), byteBuffer);
-
     return flashData;
   }
 
