@@ -37,9 +37,9 @@ public class TestDirectoryIterator {
       callbacks.processTbDataFile(eq(new File(device1OpsDir, "tbData-v00-2013y08m15d-device1.csv")), eq(true));
       callbacks.processTbDataFile(eq(new File(device1OpsDir, "tbData-v00-2013y08m16d-device1.csv")), eq(true));
     } else {
-      callbacks.processTbDataFile(eq(new File(device1OpsDir, "tbData-2013-07-15.csv")), eq(false));
-      callbacks.processTbDataFile(eq(new File(device1OpsDir, "tbData-2013-08-15.csv")), eq(false));
-      callbacks.processTbDataFile(eq(new File(device1OpsDir, "tbData-2013-08-16.csv")), eq(false));
+      callbacks.processTbDataFile(eq(new File(device1OpsDir, "tbData-v00-2013-07-15.csv")), eq(false));
+      callbacks.processTbDataFile(eq(new File(device1OpsDir, "tbData-v00-2013-08-15.csv")), eq(false));
+      callbacks.processTbDataFile(eq(new File(device1OpsDir, "tbData-v00-2013-08-16.csv")), eq(false));
     }
     callbacks.endDeviceOperationalData();
 
@@ -48,8 +48,8 @@ public class TestDirectoryIterator {
       callbacks.processTbDataFile(eq(new File(device2OpsDir, "tbData-v00-2013y07m15d-device2.csv")), eq(true));
       callbacks.processTbDataFile(eq(new File(device2OpsDir, "tbData-v00-2013y08m15d-device2.csv")), eq(true));
     } else {
-      callbacks.processTbDataFile(eq(new File(device2OpsDir, "tbData-2013-07-15.csv")), eq(false));
-      callbacks.processTbDataFile(eq(new File(device2OpsDir, "tbData-2013-08-15.csv")), eq(false));
+      callbacks.processTbDataFile(eq(new File(device2OpsDir, "tbData-v00-2013-07-15.csv")), eq(false));
+      callbacks.processTbDataFile(eq(new File(device2OpsDir, "tbData-v00-2013-08-15.csv")), eq(false));
     }
     callbacks.endDeviceOperationalData();
 
