@@ -24,13 +24,13 @@ public class TestValidatingProcessor {
 
 
   @Test
-  public void testValidV2NoManifest() throws Exception {
+  public void testValidArchiveNoManifest() throws Exception {
     ValidatingProcessor validatingProcessor = new ValidatingProcessor();
     DirectoryIterator directoryIterator = new DirectoryIterator(TestDirectoryIterator.TEST1_ARCHIVE,
                                                                 DirectoryFormat.Archive, false);
 
     directoryIterator.process(validatingProcessor);
-    TestCase.assertEquals(10, validatingProcessor.validationErrors.size());
+    TestCase.assertEquals("10 Archive files are expected without a manifest", 10, validatingProcessor.validationErrors.size());
 
     Collection<ValidationError> nonFormatErrors = Collections2.filter(validatingProcessor.validationErrors,
                                                                       new Predicate<ValidationError>() {
@@ -45,12 +45,12 @@ public class TestValidatingProcessor {
   }
 
   @Test
-  public void testValidV1NoManifest() throws Exception {
+  public void testValidSyncNoManifest() throws Exception {
     ValidatingProcessor validatingProcessor = new ValidatingProcessor();
     DirectoryIterator   directoryIterator = new DirectoryIterator(TestDirectoryIterator.TEST1_SYNC, DirectoryFormat.Sync, false);
 
     directoryIterator.process(validatingProcessor);
-    TestCase.assertEquals(0, validatingProcessor.validationErrors.size());
+    TestCase.assertEquals("10 Sync files are expected without a manifest", 10, validatingProcessor.validationErrors.size());
   }
 
   @Test
