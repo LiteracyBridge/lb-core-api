@@ -189,6 +189,9 @@ public class DirectoryIterator {
                 for (File potential : tbdataDir.listFiles((FilenameFilter) new RegexFileFilter(TBDATA_PATTERN))) {
                   callbacks.processTbDataFile(potential, false);
                 }
+                for (File potential : tbdataDir.listFiles((FilenameFilter) new RegexFileFilter(TBDATA_PATTERN_V2))) {
+                  callbacks.processTbDataFile(potential, false);
+                }
               } else {
                 for (File potential : tbdataDir.listFiles((FilenameFilter) new RegexFileFilter(TBDATA_PATTERN_V2))) {
                   callbacks.processTbDataFile(potential, true);
