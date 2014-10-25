@@ -167,6 +167,7 @@ public class DirectoryIterator {
         boolean processDevice = false;
 
         for (DeploymentPerDevice  deploymentPerDevice : deploymentPerDevices) {
+          System.out.println(deploymentPerDevice.deployment);
           if (!deploymentPerDevice.device.equalsIgnoreCase(currDevice)) {
 
             if (processDevice) {
@@ -179,11 +180,15 @@ public class DirectoryIterator {
           }
 
           if (processDevice) {
-            if (!deviceAlreadyProcessed) {
-              File  tbdataDir = getTbDataDir(root, currDevice, format);
-              if (!tbdataDir.exists()) {
-                throw new IllegalArgumentException("Malformed directory structure.  The operations portion is not properly setup: " + tbdataDir.getPath() + " does not exist.");
-              }
+            File  tbdataDir = getTbDataDir(root, currDevice, format);
+            // 
+            if (!deviceAlreadyProcessed && tbdataDir.exists()) {
+            	// commenting out lines below and only procssing if tdbdir exists since 
+            	// there has been a case of know operationaldata directory and yet still good
+            	// stats to process.  TODO: need a good warning system for these issues.
+//              if (!tbdataDir.exists()) {
+//                throw new IllegalArgumentException("Malformed directory structure.  The operations portion is not properly setup: " + tbdataDir.getPath() + " does not exist.");
+//              }
 
               if (format == DirectoryFormat.Sync) {
                 for (File potential : tbdataDir.listFiles((FilenameFilter) new RegexFileFilter(TBDATA_PATTERN))) {
@@ -235,6 +240,7 @@ public class DirectoryIterator {
 
   public void processVillage(DeploymentId deploymentId, File villageDir, DirectoryCallbacks callbacks) throws Exception {
 
+	System.out.println(villageDir);
     for (File talkingBook : villageDir.listFiles((FileFilter) DirectoryFileFilter.DIRECTORY)) {
       if (callbacks.startTalkingBook(talkingBook.getName().trim())) {
           processTalkingBook(deploymentId, talkingBook, callbacks);

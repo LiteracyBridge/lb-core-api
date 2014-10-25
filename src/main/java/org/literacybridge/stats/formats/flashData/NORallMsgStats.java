@@ -37,13 +37,16 @@ public class NORallMsgStats {
     
     allMsgStats.totalMessages = byteBuffer.getShort();
     allMsgStats.totalRotations = byteBuffer.getShort();
-
     allMsgStats.stats = new ArrayList<>(allMsgStats.totalMessages);
 
     //Run through and decode messages.  Remember, this is a fixed size
     //structure, so we need to run through the full structure, even if not every
     //element has something filled in.
     for (int i=0; i< FirmwareConstants.MAX_TRACKED_MESSAGES; i++) {
+        if (allMsgStats.totalRotations <= 0) {
+        	allMsgStats.totalRotations = 0;
+        	return allMsgStats;
+        }
       NORmsgStats[]   rotationStats = new NORmsgStats[allMsgStats.totalRotations];
 
       for (int j=0; j< FirmwareConstants.MAX_ROTATIONS; j++) {
@@ -69,7 +72,11 @@ public class NORallMsgStats {
   List<NORmsgStats[]> stats;
 
   public boolean isValid(Collection<String> errors) {
-    for (NORmsgStats[] rotationStats : getStats()) {
+	List<NORmsgStats[]> stats = getStats();
+	if (stats == null) {
+		return false;
+	}
+    for (NORmsgStats[] rotationStats : stats) {
       for (NORmsgStats singleRotationStats : rotationStats) {
         if (!singleRotationStats.isValid(errors)) {
           return false;

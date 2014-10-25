@@ -1,8 +1,10 @@
 package org.literacybridge.stats.processors;
 
 import au.com.bytecode.opencsv.CSVReader;
+
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
+
 import org.apache.commons.io.FileUtils;
 import org.joda.time.LocalDateTime;
 import org.literacybridge.stats.model.*;
@@ -36,6 +38,17 @@ public class ValidatingProcessor extends AbstractDirectoryProcessor {
                                                                .put("ACTION", 3)
                                                                .build();
 
+  protected static final Map<String, Integer> V0_TB_MAP = ImmutableMap.<String, Integer>builder()
+          .put("UPDATE_DATE_TIME", 0)
+          .put("IN-SYNCH-DIR", 0)
+          .put("IN-SN", 9)
+          .put("OUT-SN", 3)
+          .put("IN-DEPLOYMENT", 10)
+          .put("OUT-DEPLOYMENT", 4)
+          .put("IN-COMMUNITY", 13)
+          .put("OUT-COMMUNITY", 7)
+          .put("ACTION", 2)
+          .build();
 
 
   public final List<ValidationError> validationErrors = new ArrayList<>();
@@ -58,12 +71,18 @@ public class ValidatingProcessor extends AbstractDirectoryProcessor {
     currOperationalDevice = null;
   }
 
+  private int getTBdataVersion(File f) {
+	int version;
+	String stringVersion = f.getName().substring(8, 10);
+	version = Integer.parseInt(stringVersion);
+	return version;  
+  }
 
 
   @Override
   public void processTbDataFile(File tbdataFile, boolean includesHeaders) throws IOException {
 
-    FileReader fileReader = new FileReader(tbdataFile);
+	FileReader fileReader = new FileReader(tbdataFile);
     CSVReader csvReader = new CSVReader(fileReader);
 
     int lineNumber = 1;
@@ -71,9 +90,11 @@ public class ValidatingProcessor extends AbstractDirectoryProcessor {
     List<String[]> lines = csvReader.readAll();
 
     Map<String, Integer> headerMap = V1_TB_MAP;
+    if (getTBdataVersion(tbdataFile) == 0) {
+    	headerMap = V0_TB_MAP;
+    }
 
     for (String[] line : lines) {
-
       if (lineNumber == 1 && includesHeaders) {
         headerMap = processHeader(line, tbdataFile, lineNumber, incorrectFilePropertyValues);
       } else {
@@ -92,8 +113,10 @@ public class ValidatingProcessor extends AbstractDirectoryProcessor {
                                                List<IncorrectFilePropertyValue> incorrectFilePropertyValues) {
 
     Map<String, Integer> headerMap = new HashMap<>();
+    System.out.println(tbdataFile);
     for (int i=0; i<line.length; i++) {
       headerMap.put(line[i], i);
+      System.out.println(line[i]);
     }
     return ImmutableMap.copyOf(headerMap);
   }
@@ -112,7 +135,15 @@ public class ValidatingProcessor extends AbstractDirectoryProcessor {
       return;
     }
     //Get the syncDir + the deployment ID for this entry
-    String syncDirName = line[headerToIndex.get("IN-SYNCH-DIR")];
+    String syncDirName;
+    if (getTBdataVersion(tbdataFile)==0) {
+    	System.out.println(headerToIndex.get("UPDATE_DATE_TIME"));
+    	System.out.println(tbdataFile.getName());
+        syncDirName = line[headerToIndex.get("UPDATE_DATE_TIME")] + tbdataFile.getName().substring(22);
+    } else {
+    	System.out.println(headerToIndex.get("IN-SYNCH-DIR"));
+    	syncDirName = line[headerToIndex.get("IN-SYNCH-DIR")];
+    }
     String inTalkingBook = line[headerToIndex.get("IN-SN")];
     String outTalkingBook = line[headerToIndex.get("OUT-SN")];
 

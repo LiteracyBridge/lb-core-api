@@ -172,7 +172,13 @@ public class DirectoryProcessor extends AbstractDirectoryProcessor {
     }
 
     //Process all the Stats files
-    final File statDir = new File(syncDir, "statistics");
+    final File statDir = new File(new File(syncDir, "statistics"), "stats");
+    // TODO: replace the line above with the line below after processing 2014-3
+    // (The stats folder is no longer used on TB; all stats in statistics.
+    //  TB Loader has been compensating by copying into a stats subdirectory 
+    //  just for backward compatibilty; but that compensation appears not to 
+    //  have happened in first MEDA update).
+    //final File statDir = new File(syncDir, "statistics");
     if (statDir.canRead()) {
       if (statDir.isDirectory()) {
         final Iterator<File> statsFiles = FileUtils.iterateFiles(statDir, new RegexFileFilter(STATS_FILE_PATTERN),
