@@ -113,10 +113,8 @@ public class ValidatingProcessor extends AbstractDirectoryProcessor {
                                                List<IncorrectFilePropertyValue> incorrectFilePropertyValues) {
 
     Map<String, Integer> headerMap = new HashMap<>();
-    System.out.println(tbdataFile);
     for (int i=0; i<line.length; i++) {
       headerMap.put(line[i], i);
-      System.out.println(line[i]);
     }
     return ImmutableMap.copyOf(headerMap);
   }
@@ -137,11 +135,8 @@ public class ValidatingProcessor extends AbstractDirectoryProcessor {
     //Get the syncDir + the deployment ID for this entry
     String syncDirName;
     if (getTBdataVersion(tbdataFile)==0) {
-    	System.out.println(headerToIndex.get("UPDATE_DATE_TIME"));
-    	System.out.println(tbdataFile.getName());
-        syncDirName = line[headerToIndex.get("UPDATE_DATE_TIME")] + tbdataFile.getName().substring(22);
+      syncDirName = line[headerToIndex.get("UPDATE_DATE_TIME")] + tbdataFile.getName().substring(22);
     } else {
-    	System.out.println(headerToIndex.get("IN-SYNCH-DIR"));
     	syncDirName = line[headerToIndex.get("IN-SYNCH-DIR")];
     }
     String inTalkingBook = line[headerToIndex.get("IN-SN")];
@@ -156,9 +151,10 @@ public class ValidatingProcessor extends AbstractDirectoryProcessor {
     String action = line[headerToIndex.get("ACTION")];
 
     //If this is v2, the syncDir Name will have the device name in it for uniquification
-    if (this.format == DirectoryFormat.Archive) {
+    if (this.format == DirectoryFormat.Archive || syncDirName.indexOf('-') == -1) {
       syncDirName = syncDirName + "-" + currOperationalDevice;
     }
+
 
     DeploymentId nextDeploymentId = DeploymentId.parseContentUpdate(outDeploymentId);
     if (nextDeploymentId.year == 0) {

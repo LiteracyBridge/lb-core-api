@@ -27,7 +27,7 @@ public class DirectoryIterator {
   protected static final Logger logger = LoggerFactory.getLogger(DirectoryIterator.class);
 
 
-  public static final Pattern UPDATE_PATTERN = Pattern.compile("(\\d+)-(\\d+)");
+  public static final Pattern UPDATE_PATTERN = Pattern.compile("(\\d+)-(\\w+)");
 
   public static final Pattern TBDATA_PATTERN       = Pattern.compile("tbData-(\\d+)-(\\d+)-(\\d+).*");
   public static final Pattern SYNC_TIME_PATTERN_V1 = Pattern.compile("(\\d+)m(\\d+)d(\\d+)h(\\d+)m(\\d+)s");
@@ -167,7 +167,6 @@ public class DirectoryIterator {
         boolean processDevice = false;
 
         for (DeploymentPerDevice  deploymentPerDevice : deploymentPerDevices) {
-          System.out.println(deploymentPerDevice.deployment);
           if (!deploymentPerDevice.device.equalsIgnoreCase(currDevice)) {
 
             if (processDevice) {
@@ -239,9 +238,7 @@ public class DirectoryIterator {
   }
 
   public void processVillage(DeploymentId deploymentId, File villageDir, DirectoryCallbacks callbacks) throws Exception {
-
-	System.out.println(villageDir);
-    for (File talkingBook : villageDir.listFiles((FileFilter) DirectoryFileFilter.DIRECTORY)) {
+	  for (File talkingBook : villageDir.listFiles((FileFilter) DirectoryFileFilter.DIRECTORY)) {
       if (callbacks.startTalkingBook(talkingBook.getName().trim())) {
           processTalkingBook(deploymentId, talkingBook, callbacks);
           callbacks.endTalkingBook();

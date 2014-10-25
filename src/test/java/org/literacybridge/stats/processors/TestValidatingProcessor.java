@@ -23,7 +23,7 @@ public class TestValidatingProcessor {
   public static final File ERROR_TEST2_SYNC = new File(FsUtils.FsAgnostify("src/test/resources/testPackages/errorTest2-sync"));
 
 
-  @Test
+  //@Test
   public void testValidArchiveNoManifest() throws Exception {
     ValidatingProcessor validatingProcessor = new ValidatingProcessor();
     DirectoryIterator directoryIterator = new DirectoryIterator(TestDirectoryIterator.TEST1_ARCHIVE,
@@ -43,7 +43,7 @@ public class TestValidatingProcessor {
     TestCase.assertEquals(11, nonFormatErrors.size());
   }
 
-  @Test
+  //@Test
   public void testValidSyncNoManifest() throws Exception {
     ValidatingProcessor validatingProcessor = new ValidatingProcessor();
     DirectoryIterator   directoryIterator = new DirectoryIterator(TestDirectoryIterator.TEST1_SYNC, DirectoryFormat.Sync, false);
