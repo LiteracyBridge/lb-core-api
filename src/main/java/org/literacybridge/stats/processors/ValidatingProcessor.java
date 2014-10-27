@@ -96,7 +96,7 @@ public class ValidatingProcessor extends AbstractDirectoryProcessor {
 
     for (String[] line : lines) {
       if (lineNumber == 1 && includesHeaders) {
-        headerMap = processHeader(line, tbdataFile, lineNumber, incorrectFilePropertyValues);
+        headerMap = processHeader(line);
       } else {
         processLine(line, tbdataFile, lineNumber, headerMap, incorrectFilePropertyValues);
       }
@@ -109,8 +109,7 @@ public class ValidatingProcessor extends AbstractDirectoryProcessor {
     }
   }
 
-  protected Map<String, Integer> processHeader(String[] line, File tbdataFile, int lineNumber,
-                                               List<IncorrectFilePropertyValue> incorrectFilePropertyValues) {
+  protected Map<String, Integer> processHeader(String[] line) {
 
     Map<String, Integer> headerMap = new HashMap<>();
     for (int i=0; i<line.length; i++) {
@@ -133,12 +132,8 @@ public class ValidatingProcessor extends AbstractDirectoryProcessor {
       return;
     }
     //Get the syncDir + the deployment ID for this entry
-    String syncDirName;
-    if (getTBdataVersion(tbdataFile)==0) {
-      syncDirName = line[headerToIndex.get("UPDATE_DATE_TIME")] + tbdataFile.getName().substring(22);
-    } else {
-    	syncDirName = line[headerToIndex.get("IN-SYNCH-DIR")];
-    }
+    //  Until we get an OUT-SYNCH-DIR, it is easiest to just use the update date time.
+    String syncDirName = line[headerToIndex.get("UPDATE_DATE_TIME")] + "-" + currOperationalDevice;
     String inTalkingBook = line[headerToIndex.get("IN-SN")];
     String outTalkingBook = line[headerToIndex.get("OUT-SN")];
 
@@ -149,12 +144,6 @@ public class ValidatingProcessor extends AbstractDirectoryProcessor {
     String outVillage = line[headerToIndex.get("OUT-COMMUNITY")];
 
     String action = line[headerToIndex.get("ACTION")];
-
-    //If this is v2, the syncDir Name will have the device name in it for uniquification
-    if (this.format == DirectoryFormat.Archive || syncDirName.indexOf('-') == -1) {
-      syncDirName = syncDirName + "-" + currOperationalDevice;
-    }
-
 
     DeploymentId nextDeploymentId = DeploymentId.parseContentUpdate(outDeploymentId);
     if (nextDeploymentId.year == 0) {
@@ -208,7 +197,7 @@ public class ValidatingProcessor extends AbstractDirectoryProcessor {
 
 
     //Find closest matching TbData entry
-    SyncDirId tbDataEntry = findMatchingTbDataEntry(syncDirId, syncDir);
+    SyncDirId tbDataEntry = findMatchingTbDataEntry(syncDirId);
 
     //Verify each sync directory matches to EXACTLY one entry.
     LocalDateTime maxAllowableTimeV1 = syncDirId.dateTime.plusMinutes(maxTimeWindow);
@@ -292,7 +281,7 @@ public class ValidatingProcessor extends AbstractDirectoryProcessor {
 
 
 
-  private SyncDirId findMatchingTbDataEntry(SyncDirId syncDirId, File syncDir) {
+  private SyncDirId findMatchingTbDataEntry(SyncDirId syncDirId) {
 
     SyncDirId currSync = null;
     //If the manifest is from the older version, just need to verify there is an entry shortly after the syncDir time, and

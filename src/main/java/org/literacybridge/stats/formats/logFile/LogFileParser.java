@@ -60,6 +60,10 @@ public class LogFileParser {
   public static final Pattern LOG_LINE_START_PATTERN = Pattern.compile(
       "(0|(\\d+)r)(\\d+)c(\\d+)p\\D*(\\d+)d(\\d+)h(\\d+)m(\\d+)s(\\d+)/(\\d+)/(\\d+)V");
 
+  /**
+   * This matches the newer log line format that begins with a 0p
+   */
+  public static final Pattern NEW_LINE_PATTERN = Pattern.compile("\\d+p(.*)");
 
   /**
    * Matches the rest of the PLAY event, after the parts are pulled out from LOG_LINE_PATTERN +  LOG_LINE_START_PATTERN
@@ -203,6 +207,12 @@ public class LogFileParser {
 
   public LogLineInfo parseLogLineInfo(String line) throws NumberFormatException {
 
+    //The line pattern seems to have changed to include a 0p at the beginning.
+    //This catches that.
+    Matcher checkOldLine = NEW_LINE_PATTERN.matcher(line);
+    if (checkOldLine.matches()) {
+      line = checkOldLine.group(1);
+    }
 
     Matcher matcher = LOG_LINE_START_PATTERN.matcher(line);
     if (!matcher.matches()) {
@@ -435,15 +445,15 @@ public class LogFileParser {
       logger.error(errorString);
     }
 
-    if (args.equalsIgnoreCase("taken")) {
+    if ("taken".equalsIgnoreCase(args)) {
       for (TalkingBookDataProcessor eventCallback : eventCallbacks) {
         eventCallback.onSurvey(logLineContext, getContentLastPlayed());
       }
-    } else if (args.equalsIgnoreCase("apply")) {
+    } else if ("apply".equalsIgnoreCase(args)) {
       for (TalkingBookDataProcessor eventCallback : eventCallbacks) {
         eventCallback.onSurveyCompleted(logLineContext, getContentLastPlayed(), true);
       }
-    } else if (args.equalsIgnoreCase("useless")) {
+    } else if ("useless".equalsIgnoreCase(args)) {
       for (TalkingBookDataProcessor eventCallback : eventCallbacks) {
         eventCallback.onSurveyCompleted(logLineContext, getContentLastPlayed(), false);
       }
