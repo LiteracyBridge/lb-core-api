@@ -11,17 +11,14 @@ import java.util.regex.Pattern;
 public class ProcessingContext {
   public static final Pattern SYNC_TIME_PATTERN = Pattern.compile("(\\d+)m(\\d+)d(\\d+)h(\\d+)m(\\d+)s");
   public final DeploymentId deploymentId;
-  public final String       contentPackage;
   public final String       village;
   public final String       talkingBookId;
   public final String       deviceSyncedFrom;
 
 
-  public ProcessingContext(String talkingBookId, String village, String contentPackage,
-                           String contentUpdate, String deviceSyncedFrom) {
+  public ProcessingContext(String talkingBookId, String village, String contentUpdate, String deviceSyncedFrom) {
     this.talkingBookId = talkingBookId;
     this.village = village;
-    this.contentPackage = contentPackage;
     this.deploymentId = DeploymentId.parseContentUpdate(contentUpdate);
     this.deviceSyncedFrom = deviceSyncedFrom;
   }
@@ -33,8 +30,6 @@ public class ProcessingContext {
 
     SyncProcessingContext that = (SyncProcessingContext) o;
 
-    if (contentPackage != null ? !contentPackage.equals(that.contentPackage) : that.contentPackage != null)
-      return false;
     if (deploymentId != null ? !deploymentId.equals(that.deploymentId) : that.deploymentId != null)
       return false;
     if (deviceSyncedFrom != null ? !deviceSyncedFrom.equals(that.deviceSyncedFrom) : that.deviceSyncedFrom != null)
@@ -49,7 +44,6 @@ public class ProcessingContext {
   @Override
   public int hashCode() {
     int result = deploymentId != null ? deploymentId.hashCode() : 0;
-    result = 31 * result + (contentPackage != null ? contentPackage.hashCode() : 0);
     result = 31 * result + (village != null ? village.hashCode() : 0);
     result = 31 * result + (talkingBookId != null ? talkingBookId.hashCode() : 0);
     result = 31 * result + (deviceSyncedFrom != null ? deviceSyncedFrom.hashCode() : 0);
@@ -59,7 +53,6 @@ public class ProcessingContext {
   @Override public String toString() {
     return new org.apache.commons.lang.builder.ToStringBuilder(this)
         .append("contentUpdateId", deploymentId)
-        .append("contentPackage", contentPackage)
         .append("village", village)
         .append("talkingBookId", talkingBookId)
         .append("deviceSyncedFrom", deviceSyncedFrom)

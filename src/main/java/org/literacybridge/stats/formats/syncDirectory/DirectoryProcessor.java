@@ -6,6 +6,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.FalseFileFilter;
 import org.apache.commons.io.filefilter.RegexFileFilter;
+import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.apache.commons.lang.StringUtils;
 import org.literacybridge.stats.api.TalkingBookDataProcessor;
 import org.literacybridge.stats.formats.exceptions.CorruptFileException;
@@ -23,6 +24,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.*;
@@ -76,9 +78,7 @@ public class DirectoryProcessor extends AbstractDirectoryProcessor {
 
     currTalkingBook = talkingBook;
 
-    //UNDONE(willpugh) -- ContentPackage is still not super well defined or baked into our structures.  Need to fix this, although, I think the new term is "image"
-    currProcessingContext = new ProcessingContext(currTalkingBook, currVillage, currDeploymentPerDevice.deployment,
-                                                  currDeploymentPerDevice.deployment, currDeploymentPerDevice.device);
+    currProcessingContext = new ProcessingContext(currTalkingBook, currVillage, currDeploymentPerDevice.deployment, currDeploymentPerDevice.device);
     for (TalkingBookDataProcessor processor : dataProcessorEventListeners) {
       processor.onTalkingBookStart(currProcessingContext);
     }
@@ -276,6 +276,18 @@ public class DirectoryProcessor extends AbstractDirectoryProcessor {
     return retVal;
   }
 
+  static public String findContentIdByPackage(File syncDir, String defaultContentId) {
+    File  systemDir = new File(syncDir, "system");
+
+    String bestContentId = defaultContentId;
+    FileFilter fileFilter = new WildcardFileFilter("*.pkg");
+    File[] files = systemDir.listFiles(fileFilter);
+    for (File file : files) {
+        bestContentId = file.getName().substring(0, file.getName().length()-4);
+    }
+    return bestContentId;
+  }
+
   /**
    * Creates a processing context.  There are two ways to do this:
    *
@@ -302,24 +314,27 @@ public class DirectoryProcessor extends AbstractDirectoryProcessor {
   static public SyncProcessingContext determineProcessingContext(String syncDevice, File syncDir, String talkingBookId,
                                                                  String contentUpdate, String villageName, @Nullable FlashData flashData) {
 
-    SyncProcessingContext retVal;
+    //First, find the best content ID
+    String bestContentPackage = contentUpdate;
     if (flashData != null) {
-
       final SystemData systemData =  flashData.getSystemData();
-      retVal = new SyncProcessingContext(syncDir.getName(),
-                                         talkingBookId,
-                                         villageName,
-                                         StringUtils.defaultIfEmpty(systemData.getContentPackage(), contentUpdate),
-                                         contentUpdate,
-                                         syncDevice);
-    } else {
-      retVal = new SyncProcessingContext(syncDir.getName(),
-                                         talkingBookId,
-                                         villageName,
-                                         contentUpdate,
-                                         contentUpdate,
-                                         syncDevice);
+      if (StringUtils.isNotEmpty(systemData.getContentPackage())) {
+        bestContentPackage = systemData.getContentPackage();
+      }
     }
+
+    //If the best contentID was unchanged, check for the pkg file
+    if (bestContentPackage == contentUpdate) {
+      bestContentPackage = findContentIdByPackage(syncDir, bestContentPackage);
+    }
+
+
+    SyncProcessingContext retVal = new SyncProcessingContext(syncDir.getName(),
+        talkingBookId,
+        villageName,
+        StringUtils.defaultIfEmpty(bestContentPackage, contentUpdate),
+        contentUpdate,
+        syncDevice);
 
     return retVal;
   }

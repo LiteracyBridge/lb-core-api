@@ -1,5 +1,6 @@
 package org.literacybridge.stats.formats.formats.syncDirectory;
 
+import junit.framework.TestCase;
 import org.easymock.EasyMock;
 import org.junit.Test;
 import org.literacybridge.stats.api.TalkingBookDataProcessor;
@@ -21,6 +22,17 @@ import static org.easymock.EasyMock.eq;
 /**
  */
 public class TestDirectoryProcessorNew {
+
+  public static final File TEST1_SYNC = new File(FsUtils.FsAgnostify("src/test/resources/contentIdTests"));
+
+  @Test
+  public void testFindContentIdByPackage() {
+
+    String bestContentId = DirectoryProcessor.findContentIdByPackage(TEST1_SYNC, "HelloKitty");
+    TestCase.assertEquals("2014-01-ssl", bestContentId);
+  }
+
+
 
   @Test
   public void testEndToEnd() throws Exception {
