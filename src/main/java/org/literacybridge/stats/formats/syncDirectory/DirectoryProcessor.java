@@ -282,8 +282,10 @@ public class DirectoryProcessor extends AbstractDirectoryProcessor {
     String bestContentId = defaultContentId;
     FileFilter fileFilter = new WildcardFileFilter("*.pkg");
     File[] files = systemDir.listFiles(fileFilter);
-    for (File file : files) {
-        bestContentId = file.getName().substring(0, file.getName().length()-4);
+    if (files != null) {
+      for (File file : files) {
+        bestContentId = file.getName().substring(0, file.getName().length() - 4);
+      }
     }
     return bestContentId;
   }
