@@ -115,7 +115,7 @@ public class FlashData {
 
         for (NORmsgStats singleRotationStats : rotationStats) {
 
-          if (!singleRotationStats.isEmpty()) {
+          if (singleRotationStats != null && !singleRotationStats.isEmpty()) {
             msgStats.setIndexMsg(singleRotationStats.getIndexMsg());
             msgStats.setContentId(singleRotationStats.getContentId());
             msgStats.setEmpty(singleRotationStats.isEmpty());

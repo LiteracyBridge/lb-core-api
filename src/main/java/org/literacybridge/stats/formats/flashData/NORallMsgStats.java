@@ -78,7 +78,7 @@ public class NORallMsgStats {
 	}
     for (NORmsgStats[] rotationStats : stats) {
       for (NORmsgStats singleRotationStats : rotationStats) {
-        if (!singleRotationStats.isValid(errors)) {
+        if (singleRotationStats == null || !singleRotationStats.isValid(errors)) {
           return false;
         }
       }
