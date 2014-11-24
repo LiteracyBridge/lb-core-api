@@ -280,9 +280,9 @@ public class DirectoryProcessor extends AbstractDirectoryProcessor {
     File  systemDir = new File(syncDir, "system");
 
     String bestContentId = defaultContentId;
-    FileFilter fileFilter = new WildcardFileFilter("*.pkg");
-    File[] files = systemDir.listFiles(fileFilter);
-    if (files != null) {
+    if (systemDir.exists()) {
+      FileFilter fileFilter = new WildcardFileFilter("*.pkg");
+      File[] files = systemDir.listFiles(fileFilter);
       for (File file : files) {
         bestContentId = file.getName().substring(0, file.getName().length() - 4);
       }

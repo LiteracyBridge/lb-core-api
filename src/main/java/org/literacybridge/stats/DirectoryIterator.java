@@ -51,17 +51,33 @@ public class DirectoryIterator {
   public static final ObjectMapper mapper = new ObjectMapper();
 
     /**
+     * Our Root detection has just gotten a lot more complicated.  There are a few
+     * things that can happen:
+     *
+     *     The root can be the root of the zip file
+     *     The root can be under the collected-data/* directory
+     *     There can be multiple roots under either the zip file's root or the collected-data
+     *
      * THere are some zip files that are not properly formed, and start with
      *   collected-data/*.  This will check to see if this is one of those zips.
-     * @param root the root directory the zip was expanded to
+     * @param zipRoot the root directory the zip was expanded to
      * @return the proper root directory to use for processing
      */
-  public static File rootInFunnyZip(File root) {
+  public static File[] rootInFunnyZip(File zipRoot) {
+
+      File  root = zipRoot;
       File  collectedDataFile = new File(root, "collected-data");
       if (collectedDataFile.exists())
-          return collectedDataFile;
+        root = collectedDataFile;
 
-      return root;
+      File[] processingRoots = new File[] {root};
+
+      //If there is no talkingbookdata, then there are multiple roots
+      File talkingbookdata = new File(root, "talkingbookdata");
+      if (!talkingbookdata.exists()) {
+        processingRoots = root.listFiles();
+      }
+    return processingRoots;
   }
 
   public static File getManifestFile(File root) {
@@ -93,18 +109,22 @@ public class DirectoryIterator {
   }
 
   public final boolean         strict;
-  public final File            root;
+  public final File[]          rootFiles;
   public       DirectoryFormat format;
 
   public DirectoryIterator(File root, DirectoryFormat format, boolean strict) {
-    this.root = rootInFunnyZip(root);
+    this.rootFiles = rootInFunnyZip(root);
     this.strict = strict;
     this.format = format;
   }
 
-  public void process(DirectoryCallbacks callbacks) throws Exception {
+    public void process(DirectoryCallbacks callbacks) throws Exception {
+      for (File currRoot : rootFiles) {
+        process(currRoot, callbacks);
+      }
+    }
 
-
+  protected void process(final File root, DirectoryCallbacks callbacks) throws Exception {
     StatsPackageManifest manifest = null;
     File manifestFile = getManifestFile(root);
     if (manifestFile.exists()) {
@@ -119,10 +139,10 @@ public class DirectoryIterator {
         format = DirectoryFormat.Sync;
       }
 
-      manifest = generateManifest(format);
+      manifest = generateManifest(root, format);
     }
 
-    process(manifest, callbacks);
+    process(root, manifest, callbacks);
   }
 
   public static StatsPackageManifest readInManifest(File manifestFile, DirectoryFormat format, boolean strict) throws IOException {
@@ -143,15 +163,15 @@ public class DirectoryIterator {
     return manifest;
   }
 
-  public StatsPackageManifest generateManifest(DirectoryFormat format) throws Exception {
+  public StatsPackageManifest generateManifest(File root, DirectoryFormat format) throws Exception {
     this.format = format;
 
     ManifestCreationCallbacks manifestCreationCallbacks = new ManifestCreationCallbacks();
-    process(null, manifestCreationCallbacks);
+    process(root, null, manifestCreationCallbacks);
     return manifestCreationCallbacks.generateManifest(format);
   }
 
-  public void process(@Nullable StatsPackageManifest manifest, @Nonnull DirectoryCallbacks callbacks) throws Exception {
+  public void process(@Nonnull File root, @Nullable StatsPackageManifest manifest, @Nonnull DirectoryCallbacks callbacks) throws Exception {
 
     if (!root.exists()) {
       throw new IllegalArgumentException("Root directory does not exist: " + root.getCanonicalPath());
@@ -159,7 +179,7 @@ public class DirectoryIterator {
 
     if (callbacks.startProcessing(root, manifest, format)) {
 
-      TreeSet<DeploymentPerDevice> deploymentPerDevices = loadDeviceDeployments();
+      TreeSet<DeploymentPerDevice> deploymentPerDevices = loadDeviceDeployments(root);
 
       if (!deploymentPerDevices.isEmpty()) {
         String currDevice = null;
@@ -260,7 +280,7 @@ public class DirectoryIterator {
     }
   }
 
-  public TreeSet<DeploymentPerDevice> loadDeviceDeployments() {
+  public TreeSet<DeploymentPerDevice> loadDeviceDeployments(final File root) {
 
     TreeSet<DeploymentPerDevice> retVal =  new TreeSet<DeploymentPerDevice>(DeploymentPerDevice.ORDER_BY_DEVICE);
 

@@ -55,7 +55,7 @@ public class DataArchiver {
   public void archive() throws Exception {
 
     DirectoryIterator srcDirectory = new DirectoryIterator(fromDir, fromDirFormat, false);
-    TreeSet<DeploymentPerDevice> deployments = srcDirectory.loadDeviceDeployments();
+    TreeSet<DeploymentPerDevice> deployments = srcDirectory.loadDeviceDeployments(fromDir);
     List<TbDataFile> tbDataFiles = new ArrayList<>();
     Set<String> devices = new HashSet<>();
 
