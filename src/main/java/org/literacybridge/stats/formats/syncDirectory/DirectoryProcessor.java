@@ -172,7 +172,7 @@ public class DirectoryProcessor extends AbstractDirectoryProcessor {
     }
 
     //Process all the Stats files
-    final File statDir = new File(new File(syncDir, "statistics"), "stats");
+    final File statDir = new File(syncDir, "statistics");
     // TODO: replace the line above with the line below after processing 2014-3
     // (The stats folder is no longer used on TB; all stats in statistics.
     //  TB Loader has been compensating by copying into a stats subdirectory 
@@ -255,7 +255,7 @@ public class DirectoryProcessor extends AbstractDirectoryProcessor {
    * @throws java.io.IOException
    */
   static public FlashData loadFlashDataFile(File syncDir) throws IOException {
-    final File flashDataFile = new File(syncDir, FsUtils.FsAgnostify("statistics/stats/flashData.bin"));
+    final File flashDataFile = new File(syncDir, FsUtils.FsAgnostify("statistics/flashData.bin"));
 
     FlashData       retVal  = null;
     FileInputStream fis     = null;

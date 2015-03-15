@@ -2,6 +2,8 @@ package org.literacybridge.stats;
 
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.io.filefilter.RegexFileFilter;
+import org.apache.commons.io.filefilter.WildcardFileFilter;
+import org.apache.commons.io.FileUtils;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.literacybridge.stats.api.DirectoryCallbacks;
 import org.literacybridge.stats.model.*;
@@ -16,8 +18,10 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.time.Clock;
 import java.util.*;
 import java.util.regex.Pattern;
+import java.util.zip.ZipException;
 
 /**
  * This class is responsible for navigating the directory structure in a Stats Update Package.
@@ -66,18 +70,63 @@ public class DirectoryIterator {
   public static File[] rootInFunnyZip(File zipRoot) {
 
       File  root = zipRoot;
-      File  collectedDataFile = new File(root, "collected-data");
+      File  collectedDataFile = new File(root, UPDATE_ROOT_V1);
       if (collectedDataFile.exists())
         root = collectedDataFile;
+      else {
+        File[] dbAccounts = root.listFiles();
+        File dropboxAccount = null;
+        for (File f:dbAccounts) {
+          if (f.isDirectory() && !f.isHidden() && !f.getName().startsWith("_") && !f.getName().startsWith(".")) { // avoid folders like __MACOSX
+            dropboxAccount = f;
+            break;
+          }
+        }
+        if (dropboxAccount != null && dropboxAccount.exists()) {
+          File altCollectedDataFile = new File(dropboxAccount,UPDATE_ROOT_V1);
+          if (altCollectedDataFile.exists()) {
+            File[] projects = altCollectedDataFile.listFiles();
+            File project = null;
+            for (File f:projects) {
+              if (f.isDirectory() && !f.isHidden() && !f.getName().startsWith("_") && !f.getName().startsWith(".")) { // avoid folders like __MACOSX
+                // only one directory should match; if more than one, then this is the old style without a project dir
+                if (project == null) {
+                  project = f;
+                }
+                else {
+                  project = null;
+                  break;
+                }
+              }
+            }
+            if (project != null && project.exists()) {
+              System.out.println("   project directory listed");
+              root = project;
+            } else {
+              System.out.println("   OLD-no project directory listed");
+              root = altCollectedDataFile;
+            }
+          }
+        }
+      }
 
       File[] processingRoots = new File[] {root};
 
       //If there is no talkingbookdata, then there are multiple roots
-      File talkingbookdata = new File(root, "talkingbookdata");
+      File talkingbookdata = new File(root, TALKING_BOOK_ROOT_V2);
       if (!talkingbookdata.exists()) {
-        processingRoots = root.listFiles();
+        processingRoots = root.listFiles(new FileFilter() {
+          @Override
+          public boolean accept(File pathname) {
+            if (pathname.isDirectory() && !pathname.isHidden() && !pathname.getName().startsWith("_") && !pathname.getName().startsWith(".")) // avoid folders like __MACOSX
+              return true;
+            else
+              return false;
+          }
+        });
       }
-    return processingRoots;
+      System.out.println("   Size:" + (int)(FileUtils.sizeOfDirectory(root)>>20) + "MB" + "  Start Time:" + System.currentTimeMillis()/1000);
+      return processingRoots;
   }
 
   public static File getManifestFile(File root) {
@@ -249,8 +298,10 @@ public class DirectoryIterator {
   }
 
   public void processDeviceDeployment(DeploymentId deploymentId, File deviceDeploymentDir, DirectoryCallbacks callbacks) throws Exception {
+    System.out.println(" " + deploymentId.toString());
     for (File village : deviceDeploymentDir.listFiles((FileFilter) DirectoryFileFilter.DIRECTORY)) {
       if (callbacks.startVillage(village.getName().trim())) {
+        System.out.println("   " + village.getName());
         processVillage(deploymentId, village, callbacks);
         callbacks.endVillage();
       }
@@ -267,6 +318,22 @@ public class DirectoryIterator {
   }
 
   public void processTalkingBook(DeploymentId deploymentId, File talkingBookDir, DirectoryCallbacks callbacks) throws Exception {
+
+    FileFilter fileFilter = new WildcardFileFilter("*.zip");
+    File[] files = talkingBookDir.listFiles(fileFilter);
+    for (File syncZip : files) {
+      String filename = syncZip.getName().substring(0, syncZip.getName().length() - 4);
+      File folder = new File(talkingBookDir,filename);
+      if (folder.exists() && folder.isDirectory()) {
+        FileUtils.deleteDirectory(folder);
+      }
+      try {
+        FsUtils.unzip(syncZip, talkingBookDir);
+      } catch (ZipException e) {
+        logger.error("Couldn't unzip synchdir " + syncZip.getName() + "(" + e.getMessage() + ")");
+      }
+      syncZip.delete();
+    }
     for (File syncDir : talkingBookDir.listFiles((FileFilter) DirectoryFileFilter.DIRECTORY)) {
 
       SyncDirId syncDirId = SyncDirId.parseSyncDir(deploymentId, syncDir.getName().trim());
@@ -297,12 +364,13 @@ public class DirectoryIterator {
       }
     } else {
       File talkingBookData = new File(root, TALKING_BOOK_ROOT_V2);
-
-      for (File deploymentDir : talkingBookData.listFiles((FileFilter) DirectoryFileFilter.DIRECTORY)) {
-        if (UPDATE_PATTERN.matcher(deploymentDir.getName()).matches() ||
-            "UNKNOWN".equalsIgnoreCase(deploymentDir.getName())) {
-          for (File device : deploymentDir.listFiles((FileFilter) DirectoryFileFilter.DIRECTORY)) {
-            retVal.add(new DeploymentPerDevice(deploymentDir.getName(), device.getName()));
+      if (talkingBookData.exists()) {  // in some cases, there may just be an OperationalData dir but no TalkingBookData
+        for (File deploymentDir : talkingBookData.listFiles((FileFilter) DirectoryFileFilter.DIRECTORY)) {
+          if (UPDATE_PATTERN.matcher(deploymentDir.getName()).matches() ||
+                  "UNKNOWN".equalsIgnoreCase(deploymentDir.getName())) {
+            for (File device : deploymentDir.listFiles((FileFilter) DirectoryFileFilter.DIRECTORY)) {
+              retVal.add(new DeploymentPerDevice(deploymentDir.getName(), device.getName()));
+            }
           }
         }
       }

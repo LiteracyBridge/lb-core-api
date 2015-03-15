@@ -79,6 +79,6 @@ abstract public class Event implements Serializable {
   }
 
   public void setVillage(String village) {
-    this.village = village;
+    this.village = village.toUpperCase();
   }
 }
