@@ -2,7 +2,7 @@ package org.literacybridge.stats.model.validation;
 
 /**
  */
-public class InvalidVillageName extends ValidationError{
+public class InvalidVillageName extends ValidationError {
   public final String villageName;
 
   public InvalidVillageName(String villageName) {

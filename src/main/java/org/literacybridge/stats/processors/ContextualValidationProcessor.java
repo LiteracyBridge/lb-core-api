@@ -23,7 +23,7 @@ public class ContextualValidationProcessor extends ValidatingProcessor {
 
   @Override
   public boolean startDeviceDeployment(DeploymentPerDevice deploymentPerDevice)
-      throws Exception {
+    throws Exception {
     if (!deploymentIds.contains(deploymentPerDevice.deployment)) {
       validationErrors.add(new InvalidDeploymentId(deploymentPerDevice.deployment));
     }

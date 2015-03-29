@@ -3,7 +3,6 @@ package org.literacybridge.content.resolvers;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.InputStream;
 
 /**
  */
@@ -17,7 +16,7 @@ public class FileSystemResolver implements ContentResolver {
 
   @Override
   public ContentInfo loadContent(String contentId) throws FileNotFoundException {
-    File  contentFile = new File(fileRoot, contentId);
+    File contentFile = new File(fileRoot, contentId);
     if (!contentFile.canRead()) {
       throw new FileNotFoundException(contentId + " not found by the FileSystemResolver rooted at " + fileRoot.getPath());
     }

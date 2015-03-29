@@ -21,6 +21,26 @@ public class StatsFile {
   public static final int NumberOfStatsPerMsg = 6;
 
   public static final int Version = 0;
+  public final String SRN;        // SerialNumber that is written into each file.
+  public final String messageId;      // Message ID that is written into each file.
+  public final int openCount;         // 10 seconds or longer play
+  public final int completionCount;   // Finished whole recording (-Ended in log file)
+  public final int copyCount;         // Copy from device to device
+  public final int surveyCount;       // How many times did the user bring up the servey
+  public final int appliedCount;      // How many times did they say they would apply this content
+  public final int uselessCount;      // How many times did they say this was not useful content
+
+  public StatsFile(String SRN, String messageId, int openCount, int completionCount, int copyCount, int surveyCount,
+                   int appliedCount, int uselessCount) {
+    this.SRN = SRN;
+    this.messageId = messageId;
+    this.openCount = openCount;
+    this.completionCount = completionCount;
+    this.copyCount = copyCount;
+    this.surveyCount = surveyCount;
+    this.appliedCount = appliedCount;
+    this.uselessCount = uselessCount;
+  }
 
   public static StatsFile read(InputStream is) throws IOException {
 
@@ -33,7 +53,7 @@ public class StatsFile {
       int startSequence = byteBuffer.getInt();
       if (startSequence != Version) {
         throw new CorruptFileException(
-            "Version does not equal 0, so this file looks corrupt or is not compatible.");
+          "Version does not equal 0, so this file looks corrupt or is not compatible.");
       }
 
       final byte[] SRNArray = new byte[SRNMaxLength * SizeOfChar];
@@ -47,14 +67,14 @@ public class StatsFile {
       int offsetToStats = byteStream.length - (NumberOfStatsPerMsg * SizeOfInt);
       byteBuffer.position(offsetToStats);
 
-      StatsFile retVal = new StatsFile(SRN, 
-    		  						   msgId,
-                                       byteBuffer.getInt(),
-                                       byteBuffer.getInt(),
-                                       byteBuffer.getInt(),
-                                       byteBuffer.getInt(),
-                                       byteBuffer.getInt(),
-                                       byteBuffer.getInt());
+      StatsFile retVal = new StatsFile(SRN,
+        msgId,
+        byteBuffer.getInt(),
+        byteBuffer.getInt(),
+        byteBuffer.getInt(),
+        byteBuffer.getInt(),
+        byteBuffer.getInt(),
+        byteBuffer.getInt());
 
       if (retVal.openCount + retVal.surveyCount + retVal.appliedCount + retVal.uselessCount > 1000) {
         throw new CorruptFileException("Counts in the stats file seem too high to be realistic. . .");
@@ -70,8 +90,8 @@ public class StatsFile {
 
   public static void write(StatsFile file, OutputStream outputStream) throws IOException {
     //Start Sequence + Message ID + the six stats counters.
-	 
-	final byte[] bytes = new byte[SizeOfInt + (SRNMaxLength * SizeOfChar) + (MsgIDLength * SizeOfChar) + (NumberOfStatsPerMsg * SizeOfInt)];
+
+    final byte[] bytes = new byte[SizeOfInt + (SRNMaxLength * SizeOfChar) + (MsgIDLength * SizeOfChar) + (NumberOfStatsPerMsg * SizeOfInt)];
     final ByteBuffer byteBuffer = ByteBuffer.wrap(bytes);
     byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
 
@@ -95,27 +115,6 @@ public class StatsFile {
     byteBuffer.putInt(file.uselessCount);
 
     outputStream.write(bytes);
-  }
-
-  public final String SRN;			  // SerialNumber that is written into each file.
-  public final String messageId;      // Message ID that is written into each file.
-  public final int openCount;         // 10 seconds or longer play
-  public final int completionCount;   // Finished whole recording (-Ended in log file)
-  public final int copyCount;         // Copy from device to device
-  public final int surveyCount;       // How many times did the user bring up the servey
-  public final int appliedCount;      // How many times did they say they would apply this content
-  public final int uselessCount;      // How many times did they say this was not useful content
-
-  public StatsFile(String SRN, String messageId, int openCount, int completionCount, int copyCount, int surveyCount,
-                   int appliedCount, int uselessCount) {
-	this.SRN = SRN;
-	this.messageId = messageId;
-    this.openCount = openCount;
-    this.completionCount = completionCount;
-    this.copyCount = copyCount;
-    this.surveyCount = surveyCount;
-    this.appliedCount = appliedCount;
-    this.uselessCount = uselessCount;
   }
 
   @Override

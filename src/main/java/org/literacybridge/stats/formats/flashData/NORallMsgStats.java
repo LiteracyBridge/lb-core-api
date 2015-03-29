@@ -12,17 +12,25 @@ import java.util.List;
 /**
  * Contains a map of all the NOR stats messages per-content ID and per-rotation.  This mirrors the data structure of the
  * same name in https://code.google.com/p/literacybridge/source/browse/device/software/device/trunk/firmware/Application/TalkingBook/Include/filestats.h
- *
+ * <p/>
  * To get the actual content IDs of the stats indexed here, you need to look them up in the NORmsgMap.
  *
  * @author willpugh
  */
 public class NORallMsgStats {
 
-	static protected final Logger logger = LoggerFactory.getLogger(NORallMsgStats.class);
-    static public NORallMsgStats parseFromBuffer(List<String> conentIdList, ByteBuffer byteBuffer) { return parseFromBuffer(conentIdList, byteBuffer, new NORallMsgStats()); }
+  static protected final Logger logger = LoggerFactory.getLogger(NORallMsgStats.class);
+  short profileOrder;
+  String profileName;
+  short totalMessages;
+  short totalRotations;
+  List<NORmsgStats[]> stats;
 
-    static public NORallMsgStats parseFromBuffer(List<String> conentIdList, ByteBuffer byteBuffer, NORallMsgStats allMsgStats) {
+  static public NORallMsgStats parseFromBuffer(List<String> conentIdList, ByteBuffer byteBuffer) {
+    return parseFromBuffer(conentIdList, byteBuffer, new NORallMsgStats());
+  }
+
+  static public NORallMsgStats parseFromBuffer(List<String> conentIdList, ByteBuffer byteBuffer, NORallMsgStats allMsgStats) {
 
     short structId = byteBuffer.getShort();
     if (structId != FirmwareConstants.NOR_STRUCT_ID_ALL_MSGS) {
@@ -31,10 +39,10 @@ public class NORallMsgStats {
 
     allMsgStats.profileOrder = byteBuffer.getShort();
 
-    byte[]  profileNameBuffer = new byte[FirmwareConstants.MAX_PROFILE_NAME_LENGTH * FirmwareConstants.SizeOfChar];
+    byte[] profileNameBuffer = new byte[FirmwareConstants.MAX_PROFILE_NAME_LENGTH * FirmwareConstants.SizeOfChar];
     byteBuffer.get(profileNameBuffer);
-    allMsgStats.profileName = FirmwareConstants.decodeString(profileNameBuffer);     
-    
+    allMsgStats.profileName = FirmwareConstants.decodeString(profileNameBuffer);
+
     allMsgStats.totalMessages = byteBuffer.getShort();
     allMsgStats.totalRotations = byteBuffer.getShort();
     allMsgStats.stats = new ArrayList<>(allMsgStats.totalMessages);
@@ -42,14 +50,14 @@ public class NORallMsgStats {
     //Run through and decode messages.  Remember, this is a fixed size
     //structure, so we need to run through the full structure, even if not every
     //element has something filled in.
-    for (int i=0; i< FirmwareConstants.MAX_TRACKED_MESSAGES; i++) {
-        if (allMsgStats.totalRotations <= 0) {
-        	allMsgStats.totalRotations = 0;
-        	return allMsgStats;
-        }
-      NORmsgStats[]   rotationStats = new NORmsgStats[allMsgStats.totalRotations];
+    for (int i = 0; i < FirmwareConstants.MAX_TRACKED_MESSAGES; i++) {
+      if (allMsgStats.totalRotations <= 0) {
+        allMsgStats.totalRotations = 0;
+        return allMsgStats;
+      }
+      NORmsgStats[] rotationStats = new NORmsgStats[allMsgStats.totalRotations];
 
-      for (int j=0; j< FirmwareConstants.MAX_ROTATIONS; j++) {
+      for (int j = 0; j < FirmwareConstants.MAX_ROTATIONS; j++) {
         final String contentId = (i < conentIdList.size()) ? conentIdList.get(i) : null;
         NORmsgStats stats = NORmsgStats.parseFromBuffer(contentId, byteBuffer);
         if (j < rotationStats.length) {
@@ -65,17 +73,11 @@ public class NORallMsgStats {
     return allMsgStats;
   }
 
-  short               profileOrder;
-  String              profileName;
-  short               totalMessages;
-  short               totalRotations;
-  List<NORmsgStats[]> stats;
-
   public boolean isValid(Collection<String> errors) {
-	List<NORmsgStats[]> stats = getStats();
-	if (stats == null) {
-		return false;
-	}
+    List<NORmsgStats[]> stats = getStats();
+    if (stats == null) {
+      return false;
+    }
     for (NORmsgStats[] rotationStats : stats) {
       for (NORmsgStats singleRotationStats : rotationStats) {
         if (singleRotationStats == null || !singleRotationStats.isValid(errors)) {
@@ -87,19 +89,19 @@ public class NORallMsgStats {
   }
 
   public short getProfileOrder() {
-	  return profileOrder;
+    return profileOrder;
   }
 
   public void setProfileOrder(short profileOrder) {
-	  this.profileOrder = profileOrder;
+    this.profileOrder = profileOrder;
   }
-  
+
   public String getProfileName() {
-	  return profileName;
+    return profileName;
   }
 
   public void setProfileName(String profileName) {
-	  this.profileName = profileName;
+    this.profileName = profileName;
   }
 
   public short getTotalMessages() {

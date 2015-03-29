@@ -4,11 +4,9 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import junit.framework.TestCase;
 import org.junit.Test;
-import org.literacybridge.stats.formats.FirmwareConstants;
 import org.literacybridge.stats.formats.flashData.FlashData;
 import org.literacybridge.stats.formats.flashData.NORmsgStats;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
@@ -20,7 +18,7 @@ public class TestFlashData {
 
   @Test
   public void testLoadingFlashData() throws IOException {
-	final int NUM_MSGS_TEST_FLASHDATA = 8;
+    final int NUM_MSGS_TEST_FLASHDATA = 8;
     final InputStream is = getClass().getResourceAsStream("/flashDatas/flashData.bin");
     FlashData flashData = FlashData.parseFromStream(is);
     TestCase.assertNotNull(flashData);
@@ -31,7 +29,8 @@ public class TestFlashData {
     TestCase.assertEquals(NUM_MSGS_TEST_FLASHDATA, flashData.allStats().size());
 
     Collection<NORmsgStats> nonEmptyStats = Collections2.filter(flashData.allStats(), new Predicate<NORmsgStats>() {
-      @Override public boolean apply(NORmsgStats input) {
+      @Override
+      public boolean apply(NORmsgStats input) {
         return !input.isEmpty();
       }
     });

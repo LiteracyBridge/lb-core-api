@@ -17,7 +17,7 @@ public class FsUtils {
     return fsPath.replace('/', File.separatorChar);
   }
 
-  public static HashingInputStream  createSHAStream(InputStream is) {
+  public static HashingInputStream createSHAStream(InputStream is) {
     return new HashingInputStream(Hashing.sha256(), is);
   }
 
@@ -26,11 +26,10 @@ public class FsUtils {
   }
 
 
-  public static void unzip(File zipFile, File rootDir) throws IOException
-  {
+  public static void unzip(File zipFile, File rootDir) throws IOException {
     ZipFile zip = new ZipFile(zipFile);
     Enumeration<ZipEntry> entries = (Enumeration<ZipEntry>) zip.entries();
-    while(entries.hasMoreElements()) {
+    while (entries.hasMoreElements()) {
       ZipEntry entry = entries.nextElement();
       java.io.File f = new java.io.File(rootDir, entry.getName());
       if (entry.isDirectory()) {

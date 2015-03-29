@@ -9,7 +9,7 @@ import java.nio.ByteBuffer;
 /**
  * A data structure that keeps track of various system information about power on/off cycles.  This comes from the NOR flash of the
  * talking books, so the data in here should be pretty reliable in the face of corruption.
- *
+ * <p/>
  * This corresponds to the SystemCounts2 structure in https://code.google.com/p/literacybridge/source/browse/device/software/device/trunk/firmware/Application/TalkingBook/Include/sys_counters.h
  *
  * @author willpugh
@@ -17,11 +17,18 @@ import java.nio.ByteBuffer;
 public class SystemCounts {
 
   static protected final Logger logger = LoggerFactory.getLogger(SystemCounts.class);
+  short period;
+  short cumulativeDays;
+  short corruptionDay;
+  short powerups;
+  short lastInitVoltage;
+  NORrotation[] noRrotations;
 
-    static public SystemCounts parseFromBuffer(ByteBuffer byteBuffer) { return parseFromBuffer(byteBuffer, new SystemCounts()); }
+  static public SystemCounts parseFromBuffer(ByteBuffer byteBuffer) {
+    return parseFromBuffer(byteBuffer, new SystemCounts());
+  }
 
-
-    static public SystemCounts parseFromBuffer(ByteBuffer byteBuffer, SystemCounts systemCounts) {
+  static public SystemCounts parseFromBuffer(ByteBuffer byteBuffer, SystemCounts systemCounts) {
 
     short structId = byteBuffer.getShort();
     if (structId != FirmwareConstants.NOR_STRUCT_ID_COUNTS) {
@@ -35,19 +42,12 @@ public class SystemCounts {
     systemCounts.lastInitVoltage = byteBuffer.getShort();
     systemCounts.noRrotations = new NORrotation[FirmwareConstants.MAX_ROTATIONS];
 
-    for (int i=0; i< FirmwareConstants.MAX_ROTATIONS; i++) {
+    for (int i = 0; i < FirmwareConstants.MAX_ROTATIONS; i++) {
       systemCounts.noRrotations[i] = NORrotation.parseFromBuffer(byteBuffer);
     }
 
     return systemCounts;
   }
-
-  short         period;
-  short         cumulativeDays;
-  short         corruptionDay;
-  short         powerups;
-  short         lastInitVoltage;
-  NORrotation[] noRrotations;
 
   public short getPeriod() {
     return period;

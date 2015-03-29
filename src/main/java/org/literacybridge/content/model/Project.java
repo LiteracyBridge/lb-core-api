@@ -4,14 +4,12 @@ import java.util.Map;
 
 /**
  * Defines a project in
- *
- *
  */
 public class Project {
-  String    firmwareLibrary;
-  String    contentLibrary;
+  String firmwareLibrary;
+  String contentLibrary;
 
-  Map<String, DeploymentDefinition>   deployments;
+  Map<String, DeploymentDefinition> deployments;
 
   public String getFirmwareLibrary() {
     return firmwareLibrary;

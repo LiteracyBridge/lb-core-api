@@ -1,19 +1,15 @@
 package org.literacybridge.stats.processors;
 
-import au.com.bytecode.opencsv.CSVReader;
-
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
-
 import org.apache.commons.io.FileUtils;
 import org.joda.time.LocalDateTime;
+import org.literacybridge.stats.formats.tbData.TbDataParser;
 import org.literacybridge.stats.model.*;
 import org.literacybridge.stats.model.validation.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
 
@@ -21,42 +17,17 @@ import java.util.*;
  */
 public class ValidatingProcessor extends AbstractDirectoryProcessor {
 
-  protected static final Logger logger             = LoggerFactory.getLogger(ValidatingProcessor.class);
-  public static final    String DEPLOY_ID_EXPECTED = "YYYY-XX formatted string with YYYYY being the year and XX being the current deployment in this year.";
-  public static final    String SYNC_DIR_EXPECTED  = "Sync directory could not be parsed correct.  Look at https://docs.google.com/document/d/12Q0a7x15FqeZ4ys0gYy4O2MtWYrvGDUegOXwlsG9ZQY for a desciption of the appropriate formats.";
-  public static final    String CHECK_DISK_REFORMAT = "chkdsk-reformat.txt";
-
-  protected static final Map<String, Integer> V1_TB_MAP = ImmutableMap.<String, Integer>builder()
-                                                               .put("UPDATE_DATE_TIME", 0)
-                                                               .put("IN-SYNCH-DIR", 0)
-                                                               .put("IN-SN", 2)
-                                                               .put("OUT-SN", 8)
-                                                               .put("IN-DEPLOYMENT", 4)
-                                                               .put("OUT-DEPLOYMENT", 9)
-                                                               .put("IN-COMMUNITY", 5)
-                                                               .put("OUT-COMMUNITY", 10)
-                                                               .put("ACTION", 3)
-                                                               .build();
-
-  protected static final Map<String, Integer> V0_TB_MAP = ImmutableMap.<String, Integer>builder()
-          .put("UPDATE_DATE_TIME", 0)
-          .put("IN-SYNCH-DIR", 0)
-          .put("IN-SN", 9)
-          .put("OUT-SN", 3)
-          .put("IN-DEPLOYMENT", 10)
-          .put("OUT-DEPLOYMENT", 4)
-          .put("IN-COMMUNITY", 13)
-          .put("OUT-COMMUNITY", 7)
-          .put("ACTION", 2)
-          .build();
-
-
+  public static final String DEPLOY_ID_EXPECTED = "YYYY-XX formatted string with YYYYY being the year and XX being the current deployment in this year.";
+  public static final String SYNC_DIR_EXPECTED = "Sync directory could not be parsed correct.  Look at https://docs.google.com/document/d/12Q0a7x15FqeZ4ys0gYy4O2MtWYrvGDUegOXwlsG9ZQY for a desciption of the appropriate formats.";
+  public static final String CHECK_DISK_REFORMAT = "chkdsk-reformat.txt";
+  protected static final Logger logger = LoggerFactory.getLogger(ValidatingProcessor.class);
   public final List<ValidationError> validationErrors = new ArrayList<>();
 
-  final TreeMap<SyncDirId, OperationalInfo>   tbDataInfo                  = new TreeMap<>(SyncDirId.TIME_COMPARATOR);
-  final int                                   maxTimeWindow               = 10;
-  final IdentityHashMap<SyncDirId, SyncDirId> foundSyncDirs               = new IdentityHashMap<>();
-  final Set<String>                           deviceIncorrectlyInManifest = new HashSet<>();
+  final TreeMap<SyncDirId, OperationalInfo> tbDataInfo = new TreeMap<>(SyncDirId.TIME_COMPARATOR);
+  final int maxTimeWindow = 10;
+  final IdentityHashMap<SyncDirId, SyncDirId> foundSyncDirs = new IdentityHashMap<>();
+  final Set<String> deviceIncorrectlyInManifest = new HashSet<>();
+  final TbDataParser tbDataParser = new TbDataParser();
 
   private String currOperationalDevice = null;
 
@@ -71,37 +42,16 @@ public class ValidatingProcessor extends AbstractDirectoryProcessor {
     currOperationalDevice = null;
   }
 
-  private int getTBdataVersion(File f) {
-	int version;
-	String stringVersion = f.getName().substring(8, 10);
-	version = Integer.parseInt(stringVersion);
-	return version;  
-  }
-
 
   @Override
   public void processTbDataFile(File tbdataFile, boolean includesHeaders) throws IOException {
 
-	FileReader fileReader = new FileReader(tbdataFile);
-    CSVReader csvReader = new CSVReader(fileReader);
-
     int lineNumber = 1;
     List<IncorrectFilePropertyValue> incorrectFilePropertyValues = new ArrayList<>();
-    List<String[]> lines = csvReader.readAll();
+    final List<TbDataLine> tbDataLines = tbDataParser.parseTbDataFile(tbdataFile, includesHeaders);
 
-    Map<String, Integer> headerMap = V1_TB_MAP;
-    if (getTBdataVersion(tbdataFile) == 0) {
-    	headerMap = V0_TB_MAP;
-    }
-
-    for (String[] line : lines) {
-      if (lineNumber == 1 && includesHeaders) {
-        headerMap = processHeader(line);
-      } else {
-        processLine(line, tbdataFile, lineNumber, headerMap, incorrectFilePropertyValues);
-      }
-
-      lineNumber++;
+    for (TbDataLine tbDataLine : tbDataLines) {
+      processLine(tbDataLine, tbdataFile, lineNumber, incorrectFilePropertyValues);
     }
 
     if (!incorrectFilePropertyValues.isEmpty()) {
@@ -109,77 +59,50 @@ public class ValidatingProcessor extends AbstractDirectoryProcessor {
     }
   }
 
-  protected Map<String, Integer> processHeader(String[] line) {
 
-    Map<String, Integer> headerMap = new HashMap<>();
-    for (int i=0; i<line.length; i++) {
-      headerMap.put(line[i], i);
-    }
-    return ImmutableMap.copyOf(headerMap);
-  }
-
-  protected void processLine(String[] line, File tbdataFile, int lineNumber, Map<String, Integer> headerToIndex,
+  protected void processLine(TbDataLine line, File tbdataFile, int lineNumber,
                              List<IncorrectFilePropertyValue> incorrectFilePropertyValues) {
 
-    //Sometimes there is an empty line at the end, if the last line ends with carriage returns
-    if (line.length == 1 && line[0].trim().length() == 0) {
-      return;
-    }
 
-    if (line.length < 11) {
-      logger.error(
-          "Corrupt line.  Only has " + line.length + " fields in it.  " + tbdataFile.getPath() + ":" + lineNumber);
-      return;
-    }
-    //Get the syncDir + the deployment ID for this entry
-    //  Until we get an OUT-SYNCH-DIR, it is easiest to just use the update date time.
-    String syncDirName = line[headerToIndex.get("UPDATE_DATE_TIME")] + "-" + currOperationalDevice;
-    String inTalkingBook = line[headerToIndex.get("IN-SN")];
-    String outTalkingBook = line[headerToIndex.get("OUT-SN")];
+    String syncDirName = line.getUpdateDateTime() + "-" + currOperationalDevice;
 
-    String inDeploymentId = line[headerToIndex.get("IN-DEPLOYMENT")];
-    String outDeploymentId = line[headerToIndex.get("OUT-DEPLOYMENT")];
-
-    String inVillage = line[headerToIndex.get("IN-COMMUNITY")];
-    String outVillage = line[headerToIndex.get("OUT-COMMUNITY")];
-
-    String action = line[headerToIndex.get("ACTION")];
-
-    DeploymentId nextDeploymentId = DeploymentId.parseContentUpdate(outDeploymentId);
+    DeploymentId nextDeploymentId = DeploymentId.parseContentUpdate(line.getOutDeployment());
     if (nextDeploymentId.year == 0) {
       incorrectFilePropertyValues.add(
-          new IncorrectFilePropertyValue("outDeploymentId", DEPLOY_ID_EXPECTED, outDeploymentId, lineNumber));
+        new IncorrectFilePropertyValue("outDeploymentId", DEPLOY_ID_EXPECTED, line.getOutDeployment(), lineNumber));
     }
 
-    DeploymentId currDeploymentId = DeploymentId.parseContentUpdate(inDeploymentId);
+    DeploymentId currDeploymentId = DeploymentId.parseContentUpdate(line.getInDeployment());
     if (currDeploymentId.year == 0 && !"UNKNOWN".equalsIgnoreCase(currDeploymentId.id)) {
       incorrectFilePropertyValues.add(
-          new IncorrectFilePropertyValue("inDeploymentId", DEPLOY_ID_EXPECTED, inDeploymentId, lineNumber));
+        new IncorrectFilePropertyValue("inDeploymentId", DEPLOY_ID_EXPECTED, line.getInDeployment(), lineNumber));
 
       //Parse out the deployment and sync dir to make it a date.
       //Since, there is a decent amount of unknowns, make a guess in those cases. . .
       if (nextDeploymentId.year != 0) {
         currDeploymentId = nextDeploymentId.guessPrevious();
         logger.warn(
-            "DeploymentID is incorrect for " + tbdataFile.getPath() + ":" + lineNumber + ".  Guessing that it should be : " + currDeploymentId.id + " based on the out version.");
+          "DeploymentID is incorrect for " + tbdataFile.getPath() + ":" + lineNumber + ".  Guessing that it should be : " + currDeploymentId.id + " based on the out version.");
       } else {
         logger.error("Unable to resolve a deployment ID for " + tbdataFile.getPath() + ":" + lineNumber);
       }
     }
 
+    String inTalkingBook = line.getInSn();
+    String outTalkingBook = line.getOutSn();
     if (!inTalkingBook.equalsIgnoreCase(outTalkingBook) && !"UNKNOWN".equalsIgnoreCase(inTalkingBook)) {
       incorrectFilePropertyValues.add(
-          new IncorrectFilePropertyValue("outTalkingBook", inTalkingBook, outTalkingBook, lineNumber));
+        new IncorrectFilePropertyValue("outTalkingBook", inTalkingBook, outTalkingBook, lineNumber));
     }
 
     SyncDirId syncDirId = SyncDirId.parseSyncDir(currDeploymentId, syncDirName);
     LocalDateTime localDateTime = syncDirId.dateTime;
     if (localDateTime != null) {
 
-      if ("update".equalsIgnoreCase(action)) {
+      if ("update".equalsIgnoreCase(line.getAction())) {
         OperationalInfo operationalInfo = new OperationalInfo(currOperationalDevice, syncDirName, localDateTime,
-                                                              inTalkingBook, outTalkingBook,
-                                                              currDeploymentId.id, outDeploymentId, inVillage, outVillage);
+          inTalkingBook, outTalkingBook,
+          currDeploymentId.id, line.getOutDeployment(), line.getInCommunity(), line.getOutCommunity());
 
         //Theoretically, we can have dups, but it is unlikely.  In this case, log and add at a later millisecond.
         while ((operationalInfo = tbDataInfo.put(syncDirId, operationalInfo)) != null) {
@@ -203,7 +126,7 @@ public class ValidatingProcessor extends AbstractDirectoryProcessor {
     LocalDateTime maxAllowableTimeV1 = syncDirId.dateTime.plusMinutes(maxTimeWindow);
 
     //If this file is due to major corruption, just bail out.
-    File  chkdiskFile = new File(syncDir, CHECK_DISK_REFORMAT);
+    File chkdiskFile = new File(syncDir, CHECK_DISK_REFORMAT);
     if (chkdiskFile.exists()) {
       SyncDirId previousSyncDir = foundSyncDirs.put(tbDataEntry, tbDataEntry);
       if (previousSyncDir != null) {
@@ -220,7 +143,7 @@ public class ValidatingProcessor extends AbstractDirectoryProcessor {
 
 
     if (tbDataEntry == null || (manifest.formatVersion == 1 && maxAllowableTimeV1.isBefore(tbDataEntry.dateTime))) {
-      validationErrors.add(new NoMatchingTbDataError(syncDirId.dirName, syncDir,  manifest.formatVersion==1 ? SyncDirId.SYNC_VERSION_1 : SyncDirId.SYNC_VERSION_2));
+      validationErrors.add(new NoMatchingTbDataError(syncDirId.dirName, syncDir, manifest.formatVersion == 1 ? SyncDirId.SYNC_VERSION_1 : SyncDirId.SYNC_VERSION_2));
     } else {
       SyncDirId previousSyncDir = foundSyncDirs.put(tbDataEntry, tbDataEntry);
       if (previousSyncDir != null) {
@@ -228,7 +151,7 @@ public class ValidatingProcessor extends AbstractDirectoryProcessor {
       }
 
       OperationalInfo operationalInfo = tbDataInfo.get(tbDataEntry);
-      List<IncorrectPropertyValue>  incorrectPropertyValues = new LinkedList<>();
+      List<IncorrectPropertyValue> incorrectPropertyValues = new LinkedList<>();
 
       if (!currVillage.equalsIgnoreCase(operationalInfo.inVillage) && !"UNKNOWN".equalsIgnoreCase(operationalInfo.inVillage)) {
         incorrectPropertyValues.add(new IncorrectPropertyValue("Village", operationalInfo.inVillage, currVillage));
@@ -249,7 +172,7 @@ public class ValidatingProcessor extends AbstractDirectoryProcessor {
 
       if (!incorrectPropertyValues.isEmpty()) {
         File destFile = FileUtils.getFile(currDeploymentPerDevice.getRoot(currRoot, format), operationalInfo.inVillage,
-                                     operationalInfo.inTalkingBook, syncDirId.dirName);
+          operationalInfo.inTalkingBook, syncDirId.dirName);
 
         validationErrors.add(new InvalidSyncDirError(syncDir, destFile, incorrectPropertyValues));
       }
@@ -265,10 +188,10 @@ public class ValidatingProcessor extends AbstractDirectoryProcessor {
         validationErrors.add(new ManfestDoesNotContainDevice(currDeploymentPerDevice.device));
         deviceIncorrectlyInManifest.add(currDeploymentPerDevice.device);
       }
-    } else  {
-      Date  syncDirDate = syncDirId.dateTime.toDate();
-      int   startCompare = startTime.compareTo(syncDirDate);
-      int   endCompare = endTime.compareTo(syncDirDate);
+    } else {
+      Date syncDirDate = syncDirId.dateTime.toDate();
+      int startCompare = startTime.compareTo(syncDirDate);
+      int endCompare = endTime.compareTo(syncDirDate);
 
       if (startCompare > 0 || endCompare < 0) {
         if (!deviceIncorrectlyInManifest.contains(currDeploymentPerDevice.device)) {
@@ -278,7 +201,6 @@ public class ValidatingProcessor extends AbstractDirectoryProcessor {
       }
     }
   }
-
 
 
   private SyncDirId findMatchingTbDataEntry(SyncDirId syncDirId) {
@@ -318,9 +240,9 @@ public class ValidatingProcessor extends AbstractDirectoryProcessor {
     super.endProcessing();
 
     //Check to see if anything was in the TBData files, but not on the file systems
-    Set<SyncDirId>  idsInTbDataNotUsed = Sets.difference(tbDataInfo.keySet(), foundSyncDirs.keySet());
+    Set<SyncDirId> idsInTbDataNotUsed = Sets.difference(tbDataInfo.keySet(), foundSyncDirs.keySet());
     if (!idsInTbDataNotUsed.isEmpty()) {
-      List<NonMatchingTbDataEntry>  nonMatchingTbDataEntries = new ArrayList<>();
+      List<NonMatchingTbDataEntry> nonMatchingTbDataEntries = new ArrayList<>();
       for (SyncDirId id : idsInTbDataNotUsed) {
         nonMatchingTbDataEntries.add(new NonMatchingTbDataEntry(id, tbDataInfo.get(id)));
       }

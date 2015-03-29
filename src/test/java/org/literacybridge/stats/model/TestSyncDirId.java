@@ -3,8 +3,6 @@ package org.literacybridge.stats.model;
 import junit.framework.TestCase;
 import org.joda.time.LocalDateTime;
 import org.junit.Test;
-import org.literacybridge.stats.model.DeploymentId;
-import org.literacybridge.stats.model.SyncDirId;
 
 /**
  */
@@ -13,7 +11,7 @@ public class TestSyncDirId {
   @Test
   public void testParsingOldFormats() {
 
-    DeploymentId  deploymentId = DeploymentId.parseContentUpdate("2013-1");
+    DeploymentId deploymentId = DeploymentId.parseContentUpdate("2013-1");
     SyncDirId id1 = SyncDirId.parseSyncDir(deploymentId, "8m30d17h18m4s");
     TestCase.assertEquals(id1.uniquifier, "");
     TestCase.assertEquals(id1.version, SyncDirId.SYNC_VERSION_1);
@@ -33,7 +31,7 @@ public class TestSyncDirId {
     TestCase.assertEquals(id3.dateTime, new LocalDateTime(2013, 1, 3, 17, 18, 4));
 
 
-    DeploymentId  deploymentId2 = DeploymentId.parseContentUpdate("2013-6");
+    DeploymentId deploymentId2 = DeploymentId.parseContentUpdate("2013-6");
     SyncDirId id4 = SyncDirId.parseSyncDir(deploymentId2, "1m3d17h18m4s");
     TestCase.assertEquals(id4.uniquifier, "");
     TestCase.assertEquals(id4.version, SyncDirId.SYNC_VERSION_1);
@@ -45,7 +43,7 @@ public class TestSyncDirId {
   @Test
   public void testParsingNewFormats() {
 
-    DeploymentId  deploymentId = DeploymentId.parseContentUpdate("2013-1");
+    DeploymentId deploymentId = DeploymentId.parseContentUpdate("2013-1");
     SyncDirId id1 = SyncDirId.parseSyncDir(deploymentId, "2014y8m30d17h18m4s-XXX");
     TestCase.assertEquals(id1.uniquifier, "XXX");
     TestCase.assertEquals(id1.version, SyncDirId.SYNC_VERSION_2);

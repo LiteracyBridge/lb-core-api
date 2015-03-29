@@ -26,11 +26,9 @@ public interface MetadataRepositorySyncher {
    *                        {@code null}, then the sync will be from the "dawn of time", which means every metadata record will be
    *                        listed as a change, and the list of deleted versions will be empty.
    * @return MetadataSync object with the changes as well as the version in it.
-   *
    * @throws VersionNotFoundException The lastSyncVersion field was either an invalid version, or one that the system
-   * has since forgotten about.  The best thing to do is to recover by calling changesSince with {@code null} lastSyncVersion
-   * and resetting to that.
-   *
+   *                                  has since forgotten about.  The best thing to do is to recover by calling changesSince with {@code null} lastSyncVersion
+   *                                  and resetting to that.
    * @throws IOException
    */
   @Nonnull

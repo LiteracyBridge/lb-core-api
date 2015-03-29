@@ -2,7 +2,7 @@ package org.literacybridge.stats.model.validation;
 
 /**
  */
-public class ManfestDoesNotContainDevice extends ValidationError{
+public class ManfestDoesNotContainDevice extends ValidationError {
 
   public final String device;
 

@@ -5,9 +5,11 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.literacybridge.content.model.*;
 import org.literacybridge.content.resolvers.ContentResolver;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.zip.ZipEntry;
@@ -15,14 +17,14 @@ import java.util.zip.ZipOutputStream;
 
 /**
  * Creates a Deployment Object based on a Deployment Definition.
- *
+ * <p/>
  * The structure will look like:
- *
- *   /villageMap.json
- *   /firmware.bin
- *   /imageDefinitions/[ImageName].json
- *   /content/[ContentID]
- *
+ * <p/>
+ * /villageMap.json
+ * /firmware.bin
+ * /imageDefinitions/[ImageName].json
+ * /content/[ContentID]
+ * <p/>
  * https://docs.google.com/document/d/1xy9cHB43qcPv3zdo1ZmbZkmLAlbFgmsip8yaOIPtbHc/edit#
  */
 public class DeploymentObjectWriter {
@@ -33,9 +35,9 @@ public class DeploymentObjectWriter {
   public static final String CONTENT_DIR = "content";
 
 
-  final ContentResolver      contentResolver;
-  final ContentResolver      firemwareResolver;
-  final ObjectMapper         mapper = new ObjectMapper();
+  final ContentResolver contentResolver;
+  final ContentResolver firemwareResolver;
+  final ObjectMapper mapper = new ObjectMapper();
 
 
   public DeploymentObjectWriter(ContentResolver contentResolver,
@@ -73,9 +75,9 @@ public class DeploymentObjectWriter {
   }
 
   protected void writeVillageMap(Map<String, ImagePreference> villageMap, long modificationTime, ZipOutputStream zos)
-      throws IOException {
+    throws IOException {
 
-    ZipEntry  zipEntry = new ZipEntry(VILLAGE_MAP_NAME);
+    ZipEntry zipEntry = new ZipEntry(VILLAGE_MAP_NAME);
     zipEntry.setTime(modificationTime);
 
     byte[] contentBytes = mapper.writeValueAsBytes(villageMap);
@@ -90,7 +92,7 @@ public class DeploymentObjectWriter {
   }
 
   protected void writeFirmware(String firmwareId, ZipOutputStream zos) throws IOException {
-    ZipEntry  zipEntry = new ZipEntry(FIRMWARE_NAME);
+    ZipEntry zipEntry = new ZipEntry(FIRMWARE_NAME);
     ContentResolver.ContentInfo contentInfo = firemwareResolver.loadContent(firmwareId);
     zipEntry.setTime(contentInfo.lastModified);
     zipEntry.setSize(contentInfo.size);
@@ -104,12 +106,12 @@ public class DeploymentObjectWriter {
   }
 
   protected Set<String> writeImageDefinitions(Map<String, ImageDefinition> imageDefinitions, long modificationTime, ZipOutputStream zos)
-      throws IOException {
+    throws IOException {
 
-    Set<String>   contentIdsReferenced = new HashSet<String>();
+    Set<String> contentIdsReferenced = new HashSet<String>();
 
-    for (String  imageDefinitionName : imageDefinitions.keySet()) {
-      ZipEntry  zipEntry = new ZipEntry(IMAGE_DEF_DIR + "/" + imageDefinitionName);
+    for (String imageDefinitionName : imageDefinitions.keySet()) {
+      ZipEntry zipEntry = new ZipEntry(IMAGE_DEF_DIR + "/" + imageDefinitionName);
       zipEntry.setTime(modificationTime);
 
       ImageDefinition imageDefinition = imageDefinitions.get(imageDefinitionName);
@@ -118,7 +120,7 @@ public class DeploymentObjectWriter {
       collectContentIds(imageDefinition.getProfiles(), contentIdsReferenced);
 
       //Write the object definition
-      byte[]  image = mapper.writeValueAsBytes(imageDefinition);
+      byte[] image = mapper.writeValueAsBytes(imageDefinition);
       zipEntry.setSize(image.length);
 
       zos.putNextEntry(zipEntry);
@@ -146,7 +148,7 @@ public class DeploymentObjectWriter {
 
   protected void writeContentLibrary(Set<String> contentIds, ZipOutputStream zos) throws IOException {
     for (String contentId : contentIds) {
-      ZipEntry  zipEntry = new ZipEntry(CONTENT_DIR + "/" + contentId);
+      ZipEntry zipEntry = new ZipEntry(CONTENT_DIR + "/" + contentId);
 
       ContentResolver.ContentInfo contentInfo = contentResolver.loadContent(contentId);
       zipEntry.setTime(contentInfo.lastModified);

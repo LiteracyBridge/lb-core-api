@@ -33,9 +33,9 @@ public class TestDeploymentObjectWriter {
   @Test
   public void testCreatingDeploymentObject() throws IOException {
 
-    String  testVal = "HelloKitty";
+    String testVal = "HelloKitty";
 
-    long  now = System.currentTimeMillis()-37;
+    long now = System.currentTimeMillis() - 37;
 
 
     InputStream is = getClass().getResourceAsStream("/SimpleDeploymentDef.json");
@@ -45,40 +45,40 @@ public class TestDeploymentObjectWriter {
     ContentResolver contentResolver = EasyMock.createMock(ContentResolver.class);
 
     EasyMock.expect(firmwareResolver.loadContent("Firmware1")).andReturn(new ContentResolver.ContentInfo(now, testVal.length(),
-                                                                                                         IOUtils.toInputStream(testVal)));
+      IOUtils.toInputStream(testVal)));
 
     EasyMock.expect(contentResolver.loadContent("Content1")).andReturn(new ContentResolver.ContentInfo(now, testVal.length(),
-                                                                                                       IOUtils.toInputStream(testVal)));
+      IOUtils.toInputStream(testVal)));
 
     EasyMock.expect(contentResolver.loadContent("Content2")).andReturn(new ContentResolver.ContentInfo(now, testVal.length(),
-                                                                                                       IOUtils.toInputStream(testVal)));
+      IOUtils.toInputStream(testVal)));
 
     EasyMock.checkOrder(contentResolver, false);
     EasyMock.replay(contentResolver, firmwareResolver);
 
-    DeploymentObjectWriter  writer = new DeploymentObjectWriter(contentResolver, firmwareResolver);
+    DeploymentObjectWriter writer = new DeploymentObjectWriter(contentResolver, firmwareResolver);
 
     TEST_DIR.mkdirs();
-    File  testFile = File.createTempFile("TestDeploymentObjectWriter-testCreatingDeploymentObject", ".zip", TEST_DIR);
+    File testFile = File.createTempFile("TestDeploymentObjectWriter-testCreatingDeploymentObject", ".zip", TEST_DIR);
     writer.write(deploymentDefinition, testFile, now);
 
 
     Set expectedEntries = Sets.newHashSet(DeploymentObjectWriter.VILLAGE_MAP_NAME,
-                                          DeploymentObjectWriter.FIRMWARE_NAME,
-                                          DeploymentObjectWriter.CONTENT_DIR + "/Content1",
-                                          DeploymentObjectWriter.CONTENT_DIR + "/Content2",
-                                          DeploymentObjectWriter.IMAGE_DEF_DIR + "/image1",
-                                          DeploymentObjectWriter.IMAGE_DEF_DIR + "/image2");
+      DeploymentObjectWriter.FIRMWARE_NAME,
+      DeploymentObjectWriter.CONTENT_DIR + "/Content1",
+      DeploymentObjectWriter.CONTENT_DIR + "/Content2",
+      DeploymentObjectWriter.IMAGE_DEF_DIR + "/image1",
+      DeploymentObjectWriter.IMAGE_DEF_DIR + "/image2");
 
-    ZipInputStream  zis = new ZipInputStream(new FileInputStream(testFile));
-    ZipEntry  currEntry;
+    ZipInputStream zis = new ZipInputStream(new FileInputStream(testFile));
+    ZipEntry currEntry;
     while ((currEntry = zis.getNextEntry()) != null) {
       TestCase.assertTrue(expectedEntries.contains(currEntry.getName()));
 
       // /Argh.  coversion between DOS time + Java time is lossy, so this is not exact equals.
       //TestCase.assertEquals(now , currEntry.getTime());
 
-      byte[]  val = IOUtils.toByteArray(zis);
+      byte[] val = IOUtils.toByteArray(zis);
       TestCase.assertEquals(val.length, currEntry.getSize());
 
       if (currEntry.getName().startsWith(DeploymentObjectWriter.CONTENT_DIR)) {
@@ -86,15 +86,16 @@ public class TestDeploymentObjectWriter {
       } else if (currEntry.getName().startsWith(DeploymentObjectWriter.FIRMWARE_NAME)) {
         TestCase.assertTrue(Arrays.equals(testVal.getBytes(), val));
       } else if (currEntry.getName().equals(DeploymentObjectWriter.VILLAGE_MAP_NAME)) {
-        Map<String, ImagePreference>  villageMap = objectMapper.readValue(val, 0, val.length, new TypeReference<
-            HashMap<String,ImagePreference>
-            >() {});
+        Map<String, ImagePreference> villageMap = objectMapper.readValue(val, 0, val.length, new TypeReference<
+          HashMap<String, ImagePreference>
+          >() {
+        });
         TestCase.assertEquals(deploymentDefinition.getVillageMap(), villageMap);
       } else if (currEntry.getName().startsWith(DeploymentObjectWriter.IMAGE_DEF_DIR)) {
 
         ImageDefinition imageDefinition = objectMapper.readValue(val, 0, val.length, ImageDefinition.class);
 
-        String  imageName = currEntry.getName().substring(DeploymentObjectWriter.IMAGE_DEF_DIR.length() + 1);
+        String imageName = currEntry.getName().substring(DeploymentObjectWriter.IMAGE_DEF_DIR.length() + 1);
         TestCase.assertEquals(deploymentDefinition.getImageDefinitions().get(imageName), imageDefinition);
       } else {
         TestCase.fail("Illegal member in zip file");

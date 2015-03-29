@@ -1,10 +1,8 @@
 package org.literacybridge.stats.formats.flashData;
 
 import com.google.common.collect.ImmutableList;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.builder.ToStringBuilder;
-import org.literacybridge.stats.formats.FirmwareConstants;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,11 +19,15 @@ import java.util.List;
  */
 public class FlashData {
 
-  public static final short   NO_SINGLE_ROTATION = (short) -1;
+  public static final short NO_SINGLE_ROTATION = (short) -1;
+  private SystemData systemData;
+  private SystemCounts systemCounts;
+  private NORmsgMap msgMap;
+  private NORallMsgStats msgStats;
 
   static public FlashData parseFromStream(InputStream is) throws IOException {
-    final byte[]      fullBuffer = IOUtils.toByteArray(is);
-    final ByteBuffer  byteBuffer = ByteBuffer.wrap(fullBuffer);
+    final byte[] fullBuffer = IOUtils.toByteArray(is);
+    final ByteBuffer byteBuffer = ByteBuffer.wrap(fullBuffer);
     byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
 
     return parseFromBuffer(byteBuffer, new FlashData());
@@ -49,17 +51,12 @@ public class FlashData {
     return condition;
   }
 
-  private SystemData      systemData;
-  private SystemCounts    systemCounts;
-  private NORmsgMap       msgMap;
-  private NORallMsgStats  msgStats;
-
   public boolean isValid(Collection<String> errors) {
     boolean retVal =
-        doValidate(systemData != null,    errors, "systemData is null.") &&
-        doValidate(systemCounts != null,  errors, "systemCounts is null.") &&
-        doValidate(msgMap != null,        errors, "msgMap is null.") &&
-        doValidate(msgStats != null,      errors, "msgStats is null.");
+      doValidate(systemData != null, errors, "systemData is null.") &&
+        doValidate(systemCounts != null, errors, "systemCounts is null.") &&
+        doValidate(msgMap != null, errors, "msgMap is null.") &&
+        doValidate(msgStats != null, errors, "msgStats is null.");
 
     retVal = retVal & systemData.isValid(errors);
     retVal = retVal & msgStats.isValid(errors);
@@ -103,7 +100,7 @@ public class FlashData {
    *
    * @return
    */
-  public List<NORmsgStats>  allStats() {
+  public List<NORmsgStats> allStats() {
     final ImmutableList.Builder<NORmsgStats> retValBuilder = new ImmutableList.Builder<>();
 
     for (NORmsgStats[] rotationStats : msgStats.getStats()) {
@@ -150,7 +147,7 @@ public class FlashData {
    *
    * @return
    */
-  public List<NORmsgStats>  allStatsPerRotation() {
+  public List<NORmsgStats> allStatsPerRotation() {
     final ImmutableList.Builder<NORmsgStats> retValBuilder = new ImmutableList.Builder<>();
 
     for (NORmsgStats[] rotationStats : msgStats.getStats()) {
@@ -187,12 +184,13 @@ public class FlashData {
     return result;
   }
 
-  @Override public String toString() {
+  @Override
+  public String toString() {
     return new ToStringBuilder(this)
-        .append("systemData", systemData)
-        .append("systemCounts", systemCounts)
-        .append("msgMap", msgMap)
-        .append("msgStats", msgStats)
-        .toString();
+      .append("systemData", systemData)
+      .append("systemCounts", systemCounts)
+      .append("msgMap", msgMap)
+      .append("msgStats", msgStats)
+      .toString();
   }
 }

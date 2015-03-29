@@ -11,26 +11,33 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "playedevents")
 public class PlayedEvent extends Event {
-  @Column private String contentId;
-  @Column private int volume;
-  @Column private short timePlayed;
-  @Column private short totalTime;
-  @Column private double percentDone;
-  @Column private boolean isFinished;
+  @Column
+  private String contentId;
+  @Column
+  private int volume;
+  @Column
+  private short timePlayed;
+  @Column
+  private short totalTime;
+  @Column
+  private double percentDone;
+  @Column
+  private boolean isFinished;
 
 
-    public PlayedEvent() {}
+  public PlayedEvent() {
+  }
 
-    public PlayedEvent(String contentId, int volume, short timePlayed, short totalTime, double percentDone, boolean finished) {
-        this.contentId = contentId;
-        this.volume = volume;
-        this.timePlayed = timePlayed;
-        this.totalTime = totalTime;
-        this.percentDone = percentDone;
-        isFinished = finished;
-    }
+  public PlayedEvent(String contentId, int volume, short timePlayed, short totalTime, double percentDone, boolean finished) {
+    this.contentId = contentId;
+    this.volume = volume;
+    this.timePlayed = timePlayed;
+    this.totalTime = totalTime;
+    this.percentDone = percentDone;
+    isFinished = finished;
+  }
 
-    public String getContentId() {
+  public String getContentId() {
     return contentId;
   }
 

@@ -11,9 +11,9 @@ import java.util.regex.Pattern;
 public class ProcessingContext {
   public static final Pattern SYNC_TIME_PATTERN = Pattern.compile("(\\d+)m(\\d+)d(\\d+)h(\\d+)m(\\d+)s");
   public final DeploymentId deploymentId;
-  public final String       village;
-  public final String       talkingBookId;
-  public final String       deviceSyncedFrom;
+  public final String village;
+  public final String talkingBookId;
+  public final String deviceSyncedFrom;
 
 
   public ProcessingContext(String talkingBookId, String village, String contentUpdate, String deviceSyncedFrom) {
@@ -50,12 +50,13 @@ public class ProcessingContext {
     return result;
   }
 
-  @Override public String toString() {
+  @Override
+  public String toString() {
     return new org.apache.commons.lang.builder.ToStringBuilder(this)
-        .append("contentUpdateId", deploymentId)
-        .append("village", village)
-        .append("talkingBookId", talkingBookId)
-        .append("deviceSyncedFrom", deviceSyncedFrom)
-        .toString();
+      .append("contentUpdateId", deploymentId)
+      .append("village", village)
+      .append("talkingBookId", talkingBookId)
+      .append("deviceSyncedFrom", deviceSyncedFrom)
+      .toString();
   }
 }

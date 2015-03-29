@@ -10,8 +10,8 @@ import org.joda.time.LocalDateTime;
  * @author willpugh
  */
 public class SyncProcessingContext extends ProcessingContext {
-  public final LocalDateTime  syncTime;
-  public final String         contentPackage;
+  public final LocalDateTime syncTime;
+  public final String contentPackage;
 
   public SyncProcessingContext(String syncString, String talkingBookId, String village, String contentPackage,
                                String contentUpdate, String deviceSyncedFrom) {

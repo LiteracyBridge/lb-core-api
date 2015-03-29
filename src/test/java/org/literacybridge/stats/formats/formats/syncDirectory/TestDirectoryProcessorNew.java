@@ -1,23 +1,11 @@
 package org.literacybridge.stats.formats.formats.syncDirectory;
 
 import junit.framework.TestCase;
-import org.easymock.EasyMock;
 import org.junit.Test;
-import org.literacybridge.stats.api.TalkingBookDataProcessor;
 import org.literacybridge.stats.formats.syncDirectory.DirectoryProcessor;
-import org.literacybridge.stats.model.ProcessingContext;
-import org.literacybridge.stats.model.SyncProcessingContext;
-import org.literacybridge.stats.formats.logFile.LogAction;
-import org.literacybridge.stats.formats.logFile.LogLineContext;
-import org.literacybridge.stats.formats.statsFile.StatsFile;
-import org.literacybridge.stats.DirectoryIterator;
-import org.literacybridge.stats.model.DirectoryFormat;
 import org.literacybridge.utils.FsUtils;
 
 import java.io.File;
-
-import static org.easymock.EasyMock.anyObject;
-import static org.easymock.EasyMock.eq;
 
 /**
  */
@@ -31,7 +19,6 @@ public class TestDirectoryProcessorNew {
     String bestContentId = DirectoryProcessor.findContentIdByPackage(TEST1_SYNC, "HelloKitty");
     TestCase.assertEquals("2014-01-ssl", bestContentId);
   }
-
 
 
   @Test

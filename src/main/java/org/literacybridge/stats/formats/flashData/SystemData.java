@@ -13,20 +13,30 @@ import java.util.Collection;
 /**
  * Data structure that describes the basic system data from the Talking Book.  This data comes off the NOR Flash, so should be extremely
  * reliable in the face of power failures and other potentially corrupting efforts.
- *
+ * <p/>
  * Corresponds to the C-structure in
- *   https://code.google.com/p/literacybridge/source/browse/device/software/device/trunk/firmware/Application/TalkingBook/Include/sys_counters.h
- *
+ * https://code.google.com/p/literacybridge/source/browse/device/software/device/trunk/firmware/Application/TalkingBook/Include/sys_counters.h
+ * <p/>
  * The C-code us using 2-byte characters.
  *
  * @Author willpugh
  */
 public class SystemData {
   static protected final Logger logger = LoggerFactory.getLogger(SystemData.class);
+  short countReflashes;
+  String serialNumber;
+  String updateNumber;
+  String location;
+  String contentPackage;
+  short dayLastUpdated;
+  short monthLastUpdated;
+  short yearLastUpdated;
 
-    static public SystemData parseFromBuffer(ByteBuffer byteBuffer) { return parseFromBuffer(byteBuffer, new SystemData()); }
+  static public SystemData parseFromBuffer(ByteBuffer byteBuffer) {
+    return parseFromBuffer(byteBuffer, new SystemData());
+  }
 
-    static public SystemData parseFromBuffer(ByteBuffer byteBuffer, SystemData systemData) {
+  static public SystemData parseFromBuffer(ByteBuffer byteBuffer, SystemData systemData) {
     short structId = byteBuffer.getShort();
     if (structId != FirmwareConstants.SYSTEM_DATA_ID) {
       logger.error("Invalid struct ID.  Should be " + FirmwareConstants.SYSTEM_DATA_ID + " but is actually " + structId);
@@ -34,19 +44,19 @@ public class SystemData {
 
     systemData.countReflashes = byteBuffer.getShort();
 
-    byte[] serialNumberBytes          = new byte[FirmwareConstants.FIXED_SERIAL_NUMBER_SIZE * FirmwareConstants.SizeOfChar];
-    byte[] updateNumberBytes          = new byte[FirmwareConstants.FIXED_UPDATE_NUMBER_SIZE * FirmwareConstants.SizeOfChar];
-    byte[] locationNumberBytes        = new byte[FirmwareConstants.FIXED_LOCATION_SIZE * FirmwareConstants.SizeOfChar];
-    byte[] imageNameNumberBytes  = new byte[FirmwareConstants.FIXED_IMAGE_NAME_SIZE * FirmwareConstants.SizeOfChar];
+    byte[] serialNumberBytes = new byte[FirmwareConstants.FIXED_SERIAL_NUMBER_SIZE * FirmwareConstants.SizeOfChar];
+    byte[] updateNumberBytes = new byte[FirmwareConstants.FIXED_UPDATE_NUMBER_SIZE * FirmwareConstants.SizeOfChar];
+    byte[] locationNumberBytes = new byte[FirmwareConstants.FIXED_LOCATION_SIZE * FirmwareConstants.SizeOfChar];
+    byte[] imageNameNumberBytes = new byte[FirmwareConstants.FIXED_IMAGE_NAME_SIZE * FirmwareConstants.SizeOfChar];
 
     byteBuffer.get(serialNumberBytes);
     byteBuffer.get(updateNumberBytes);
     byteBuffer.get(locationNumberBytes);
     byteBuffer.get(imageNameNumberBytes);
 
-    systemData.serialNumber   = FirmwareConstants.decodeString(serialNumberBytes).trim();
-    systemData.updateNumber   = FirmwareConstants.decodeString(updateNumberBytes).trim();
-    systemData.location       = FirmwareConstants.decodeString(locationNumberBytes).trim();
+    systemData.serialNumber = FirmwareConstants.decodeString(serialNumberBytes).trim();
+    systemData.updateNumber = FirmwareConstants.decodeString(updateNumberBytes).trim();
+    systemData.location = FirmwareConstants.decodeString(locationNumberBytes).trim();
     systemData.contentPackage = FirmwareConstants.decodeString(imageNameNumberBytes).trim();
 
     systemData.dayLastUpdated = byteBuffer.getShort();
@@ -56,27 +66,17 @@ public class SystemData {
     return systemData;
   }
 
-  short  countReflashes;
-  String serialNumber;
-  String updateNumber;
-  String location;
-  String contentPackage;
-  short  dayLastUpdated;
-  short  monthLastUpdated;
-  short  yearLastUpdated;
-
-
   public boolean isValid(Collection<String> errors) {
 
-    return  FlashData.doValidate(StringUtils.isNotEmpty(serialNumber), errors, "serialNumber is empty.") &&
-            FlashData.doValidate(StringUtils.isEmpty(updateNumber), errors, "updateNumber is empty.") &&
-            FlashData.doValidate(StringUtils.isEmpty(location), errors, "location is empty.") &&
-            FlashData.doValidate(StringUtils.isEmpty(contentPackage), errors, "contentPackage is empty.");
+    return FlashData.doValidate(StringUtils.isNotEmpty(serialNumber), errors, "serialNumber is empty.") &&
+      FlashData.doValidate(StringUtils.isEmpty(updateNumber), errors, "updateNumber is empty.") &&
+      FlashData.doValidate(StringUtils.isEmpty(location), errors, "location is empty.") &&
+      FlashData.doValidate(StringUtils.isEmpty(contentPackage), errors, "contentPackage is empty.");
   }
 
   /**
    * The number of times the NOR Flash has been re-flashed for this data structure.
-   *
+   * <p/>
    * This is important, because the cost of the NORFlash being so reliable is that it can only
    * be re-flashed a limited number of times.
    *
@@ -92,6 +92,7 @@ public class SystemData {
 
   /**
    * Serial number for the device.  This is the same as the Talking Book ID.
+   *
    * @return
    */
   public String getSerialNumber() {
@@ -104,8 +105,9 @@ public class SystemData {
 
   /**
    * The Content Update, this is a string of the format YEAR-UPDATE, e.g.
-   *     2013-6
+   * 2013-6
    * for the sixth update in 2014
+   *
    * @return
    */
   public String getUpdateNumber() {
@@ -118,6 +120,7 @@ public class SystemData {
 
   /**
    * The village this talking book was deployed to.
+   *
    * @return
    */
   public String getLocation() {
@@ -201,16 +204,17 @@ public class SystemData {
     return result;
   }
 
-  @Override public String toString() {
+  @Override
+  public String toString() {
     return new ToStringBuilder(this)
-        .append("countReflashes", countReflashes)
-        .append("serialNumber", serialNumber)
-        .append("updateNumber", updateNumber)
-        .append("location", location)
-        .append("contentPackage", contentPackage)
-        .append("dayLastUpdated", dayLastUpdated)
-        .append("monthLastUpdated", monthLastUpdated)
-        .append("yearLastUpdated", yearLastUpdated)
-        .toString();
+      .append("countReflashes", countReflashes)
+      .append("serialNumber", serialNumber)
+      .append("updateNumber", updateNumber)
+      .append("location", location)
+      .append("contentPackage", contentPackage)
+      .append("dayLastUpdated", dayLastUpdated)
+      .append("monthLastUpdated", monthLastUpdated)
+      .append("yearLastUpdated", yearLastUpdated)
+      .toString();
   }
 }

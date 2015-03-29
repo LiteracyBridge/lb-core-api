@@ -15,30 +15,27 @@ import java.util.*;
 /**
  * Copies a directory structure from the sync format to be in the archive format.  The only
  * real difference here is that the sync format is rooted at the devices doing the sync, e.g.
- *
+ * <p/>
  * /Fidelis/collected-data/2013-03
- *
+ * <p/>
  * and the archive is rooted at the Deployment Id
- *
+ * <p/>
  * /2013-03/Fidelis
- *
+ * <p/>
  * In addition, this code can do some fixup if it finds any obvious corruption.
- *
- *
+ * <p/>
+ * <p/>
  * /deployment/device/
  * /operations/device/[tbdata files]
- *
  */
 public class DataArchiver {
 
-  protected static final Logger logger = LoggerFactory.getLogger(DataArchiver.class);
-
   public static final String DEVICE_OPERATIONS_DIR_ARCHIVE = "operations";
-
-  public final File            toDir;
+  protected static final Logger logger = LoggerFactory.getLogger(DataArchiver.class);
+  public final File toDir;
   public final DirectoryFormat toDirFormat;
 
-  public final File            fromDir;
+  public final File fromDir;
   public final DirectoryFormat fromDirFormat;
 
   public final boolean doFixup;
@@ -50,6 +47,37 @@ public class DataArchiver {
     this.fromDir = fromDir;
     this.fromDirFormat = fromDirFormat;
     this.doFixup = doFixup;
+  }
+
+  static public void fixupOnly(File dir, DirectoryFormat format) throws Exception {
+
+    DirectoryCorruptionFixer fixer = new DirectoryCorruptionFixer(dir, format, false);
+    List<ValidationError> errors = fixer.fixUp();
+
+    for (ValidationError error : errors) {
+      logger.error(error.errorMessage);
+    }
+
+  }
+
+  static List<TbDataFile> getTbDataFiles(File rootDir, String deviceName, DirectoryFormat fmt) {
+    List<TbDataFile> retVal = new ArrayList<>();
+
+    File operationsDir = DeviceOperationsDirectory(rootDir, deviceName, fmt);
+    for (File tbDataFile : operationsDir.listFiles()) {
+      if (DirectoryIterator.TBDATA_PATTERN.matcher(tbDataFile.getName()).matches()) {
+        retVal.add(new TbDataFile(deviceName, tbDataFile));
+      }
+    }
+    return retVal;
+  }
+
+  static File DeviceOperationsDirectory(File rootDir, String deviceName, DirectoryFormat fmt) {
+    if (fmt == DirectoryFormat.Sync) {
+      return new File(rootDir, FsUtils.FsAgnostify(deviceName + "/" + DirectoryIterator.UPDATE_ROOT_V1));
+    } else {
+      return new File(rootDir, FsUtils.FsAgnostify(DEVICE_OPERATIONS_DIR_ARCHIVE + "/" + deviceName));
+    }
   }
 
   public void archive() throws Exception {
@@ -91,7 +119,7 @@ public class DataArchiver {
         File destOperationFile = DeviceOperationsDirectory(toDir, deviceName, toDirFormat);
 
         //Copy all the TBDatas
-        List<TbDataFile>  tbDataDeviceFiles = getTbDataFiles(fromDir, deviceName, fromDirFormat);
+        List<TbDataFile> tbDataDeviceFiles = getTbDataFiles(fromDir, deviceName, fromDirFormat);
         for (TbDataFile dataFile : tbDataDeviceFiles) {
           tbDataFiles.add(dataFile);
           FileUtils.copyFileToDirectory(dataFile.file, destOperationFile);
@@ -105,45 +133,13 @@ public class DataArchiver {
 
   }
 
-  static public void fixupOnly(File dir, DirectoryFormat format) throws Exception {
-
-    DirectoryCorruptionFixer fixer = new DirectoryCorruptionFixer(dir, format, false);
-    List<ValidationError> errors = fixer.fixUp();
-
-    for (ValidationError error : errors) {
-      logger.error(error.errorMessage);
-    }
-
-  }
-
-
-  static List<TbDataFile> getTbDataFiles(File rootDir, String deviceName, DirectoryFormat fmt) {
-    List<TbDataFile>  retVal = new ArrayList<>();
-
-    File operationsDir = DeviceOperationsDirectory(rootDir, deviceName, fmt);
-    for (File tbDataFile : operationsDir.listFiles()) {
-      if (DirectoryIterator.TBDATA_PATTERN.matcher(tbDataFile.getName()).matches()) {
-        retVal.add(new TbDataFile(deviceName, tbDataFile));
-      }
-    }
-    return retVal;
-  }
-
   static private class TbDataFile {
-    final String  device;
-    final File    file;
+    final String device;
+    final File file;
 
     private TbDataFile(String device, File file) {
       this.device = device;
       this.file = file;
-    }
-  }
-
-  static File DeviceOperationsDirectory(File rootDir, String deviceName, DirectoryFormat fmt) {
-    if (fmt == DirectoryFormat.Sync) {
-      return new File(rootDir, FsUtils.FsAgnostify(deviceName + "/" + DirectoryIterator.UPDATE_ROOT_V1));
-    } else {
-      return new File(rootDir, FsUtils.FsAgnostify(DEVICE_OPERATIONS_DIR_ARCHIVE + "/" + deviceName));
     }
   }
 

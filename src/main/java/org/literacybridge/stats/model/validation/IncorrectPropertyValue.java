@@ -16,9 +16,9 @@ public class IncorrectPropertyValue {
   @Override
   public String toString() {
     return "IncorrectPropertyValue{" +
-        "propertyName='" + propertyName + '\'' +
-        ", expectedValue='" + expectedValue + '\'' +
-        ", actualValue='" + actualValue + '\'' +
-        '}';
+      "propertyName='" + propertyName + '\'' +
+      ", expectedValue='" + expectedValue + '\'' +
+      ", actualValue='" + actualValue + '\'' +
+      '}';
   }
 }

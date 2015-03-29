@@ -3,18 +3,17 @@ package org.literacybridge.stats.model;
 import java.util.Date;
 
 /**
- *  Represents the time range this represents for when the device was synced.  The
- *  startTime is considered inclusive and the end time is considered exclusive.
- *
- *  So if a Device were to sync for the first time, the range would be something like
- *  [0, 2013-08-19T08:33:32)
- *
- *  then the next sync would start at the end time, till current time, e.g.
- *  [2013-08-19T08:33:32, 2013-10-05T13:04:12)
- *
- *  Times SHOULD be standardized into UTC, however, since we are mainly using this information to
- *  look for gaps in the records, then as long as the time is consistent, we should be O.K.
- *
+ * Represents the time range this represents for when the device was synced.  The
+ * startTime is considered inclusive and the end time is considered exclusive.
+ * <p/>
+ * So if a Device were to sync for the first time, the range would be something like
+ * [0, 2013-08-19T08:33:32)
+ * <p/>
+ * then the next sync would start at the end time, till current time, e.g.
+ * [2013-08-19T08:33:32, 2013-10-05T13:04:12)
+ * <p/>
+ * Times SHOULD be standardized into UTC, however, since we are mainly using this information to
+ * look for gaps in the records, then as long as the time is consistent, we should be O.K.
  */
 public class SyncRange {
 

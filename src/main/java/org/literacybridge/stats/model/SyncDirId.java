@@ -8,13 +8,20 @@ import java.util.regex.Matcher;
 
 /**
  */
-public class SyncDirId /*implements Comparable<SyncDirId>*/{
+public class SyncDirId /*implements Comparable<SyncDirId>*/ {
 
+  public static final int SYNC_VERSION_1 = 1;
+  public static final int SYNC_VERSION_2 = 2;
+  public final LocalDateTime dateTime;
+  public final String dirName;
+  public final String uniquifier;
   public static final Comparator<SyncDirId> TIME_COMPARATOR = new Comparator<SyncDirId>() {
     @Override
     public int compare(SyncDirId o1, SyncDirId o2) {
-      if (o1 == o2) { return 0; }
-      if (o1.dateTime==null && o2.dateTime!=null) {
+      if (o1 == o2) {
+        return 0;
+      }
+      if (o1.dateTime == null && o2.dateTime != null) {
         return -1;
       }
 
@@ -29,15 +36,15 @@ public class SyncDirId /*implements Comparable<SyncDirId>*/{
       return retVal;
     }
   };
+  public final int version;
 
-  public static final int SYNC_VERSION_1 = 1;
-  public static final int SYNC_VERSION_2 = 2;
 
-  public final LocalDateTime dateTime;
-  public final String        dirName;
-  public final String        uniquifier;
-  public final int           version;
-
+  protected SyncDirId(LocalDateTime dateTime, String dirName, String uniquifier, int version) {
+    this.dateTime = dateTime;
+    this.dirName = dirName;
+    this.uniquifier = uniquifier;
+    this.version = version;
+  }
 
   public static SyncDirId parseSyncDir(DeploymentId deploymentId, String syncDirName) {
 
@@ -46,11 +53,11 @@ public class SyncDirId /*implements Comparable<SyncDirId>*/{
     if (matchv2.matches()) {
 
       LocalDateTime dateTime = new LocalDateTime(Integer.parseInt(matchv2.group(1)),
-                                                 Integer.parseInt(matchv2.group(2)),
-                                                 Integer.parseInt(matchv2.group(3)),
-                                                 Integer.parseInt(matchv2.group(4)),
-                                                 Integer.parseInt(matchv2.group(5)),
-                                                 Integer.parseInt(matchv2.group(6)));
+        Integer.parseInt(matchv2.group(2)),
+        Integer.parseInt(matchv2.group(3)),
+        Integer.parseInt(matchv2.group(4)),
+        Integer.parseInt(matchv2.group(5)),
+        Integer.parseInt(matchv2.group(6)));
       retVal = new SyncDirId(dateTime, syncDirName, matchv2.group(7), SYNC_VERSION_2);
 
     } else {
@@ -61,10 +68,10 @@ public class SyncDirId /*implements Comparable<SyncDirId>*/{
       if (dateTime != null) {
 
         if ((dateTime.getMonthOfYear() == 1 || dateTime.getMonthOfYear() == 2) &&
-            (deploymentId.update != 1 && deploymentId.update != 2)) {
+          (deploymentId.update != 1 && deploymentId.update != 2)) {
           dateTime = dateTime.plusYears(1);
         } else if ((dateTime.getMonthOfYear() == 11 || dateTime.getMonthOfYear() == 12) &&
-            (deploymentId.update == 1)) {
+          (deploymentId.update == 1)) {
           dateTime = dateTime.minusYears(1);
         }
       }
@@ -89,24 +96,17 @@ public class SyncDirId /*implements Comparable<SyncDirId>*/{
     }
 
     return new LocalDateTime(baseYear,
-                             Integer.parseInt(match.group(1)),
-                             Integer.parseInt(match.group(2)),
-                             Integer.parseInt(match.group(3)),
-                             Integer.parseInt(match.group(4)),
-                             Integer.parseInt(match.group(5)));
+      Integer.parseInt(match.group(1)),
+      Integer.parseInt(match.group(2)),
+      Integer.parseInt(match.group(3)),
+      Integer.parseInt(match.group(4)),
+      Integer.parseInt(match.group(5)));
 
-  }
-
-
-  protected SyncDirId(LocalDateTime dateTime, String dirName, String uniquifier, int version) {
-    this.dateTime = dateTime;
-    this.dirName = dirName;
-    this.uniquifier = uniquifier;
-    this.version = version;
   }
 
   /**
    * Adds a millisecond to the localdatetime.  This is to uniquify in some collections.
+   *
    * @return
    */
   public SyncDirId addMilli() {
@@ -152,7 +152,7 @@ public class SyncDirId /*implements Comparable<SyncDirId>*/{
   @Override
   public String toString() {
     return "SyncDirId{" +
-        "dirName='" + dirName + '\'' +
-        '}';
+      "dirName='" + dirName + '\'' +
+      '}';
   }
 }

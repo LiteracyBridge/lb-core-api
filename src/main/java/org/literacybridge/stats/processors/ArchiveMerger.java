@@ -4,7 +4,10 @@ import com.google.common.collect.Sets;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.literacybridge.stats.DirectoryIterator;
-import org.literacybridge.stats.model.*;
+import org.literacybridge.stats.model.DeploymentPerDevice;
+import org.literacybridge.stats.model.DirectoryFormat;
+import org.literacybridge.stats.model.StatsPackageManifest;
+import org.literacybridge.stats.model.SyncRange;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -16,10 +19,10 @@ import java.util.Set;
 
 /**
  */
-public class ArchiveMerger extends AbstractDirectoryProcessor{
+public class ArchiveMerger extends AbstractDirectoryProcessor {
 
-  public final File             dest;
-  public final DirectoryFormat  format;
+  public final File dest;
+  public final DirectoryFormat format;
 
   public String operationalDevice;
 
@@ -29,13 +32,12 @@ public class ArchiveMerger extends AbstractDirectoryProcessor{
   }
 
 
-
-  public static StatsPackageManifest  mergeManifests(StatsPackageManifest manifest1, StatsPackageManifest manifest2) {
+  public static StatsPackageManifest mergeManifests(StatsPackageManifest manifest1, StatsPackageManifest manifest2) {
     if (manifest1.formatVersion != manifest2.formatVersion) {
       throw new IllegalArgumentException("Format Versions need to be the same to merge them.");
     }
 
-    Set<String> devices =  Sets.union(manifest1.devices.keySet(), manifest2.devices.keySet());
+    Set<String> devices = Sets.union(manifest1.devices.keySet(), manifest2.devices.keySet());
     Map<String, SyncRange> deviceRanges = new HashMap<>();
     for (String device : devices) {
       deviceRanges.put(device, mergeSyncRanges(manifest1.devices.get(device), manifest1.devices.get(device)));
@@ -53,16 +55,16 @@ public class ArchiveMerger extends AbstractDirectoryProcessor{
       return range1;
     }
 
-    return new SyncRange(range1.getStartTime().compareTo(range2.getStartTime()) < 0 ?  range1.getStartTime() : range2.getStartTime(),
-                         range1.getEndTime().compareTo(range2.getEndTime()) > 0 ?  range1.getEndTime() : range2.getEndTime(),
-                         range1.isIncomplete() || range2.isIncomplete());
+    return new SyncRange(range1.getStartTime().compareTo(range2.getStartTime()) < 0 ? range1.getStartTime() : range2.getStartTime(),
+      range1.getEndTime().compareTo(range2.getEndTime()) > 0 ? range1.getEndTime() : range2.getEndTime(),
+      range1.isIncomplete() || range2.isIncomplete());
   }
 
   @Override
   public boolean startProcessing(File root, StatsPackageManifest manifest, DirectoryFormat format) throws Exception {
     File destManifestFile = DirectoryIterator.getManifestFile(dest);
     StatsPackageManifest destManifest = DirectoryIterator.readInManifest(destManifestFile, DirectoryFormat.Archive,
-                                                                         false);
+      false);
     StatsPackageManifest mergedManifest = mergeManifests(manifest, destManifest);
     super.startProcessing(root, mergedManifest, format);
 
@@ -73,7 +75,7 @@ public class ArchiveMerger extends AbstractDirectoryProcessor{
 
   @Override
   public boolean startDeviceDeployment(DeploymentPerDevice deploymentPerDevice)
-      throws Exception {
+    throws Exception {
     super.startDeviceDeployment(deploymentPerDevice);
 
     File srcDir = deploymentPerDevice.getRoot(currRoot, format);

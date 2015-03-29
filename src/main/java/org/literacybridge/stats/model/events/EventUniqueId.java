@@ -15,14 +15,22 @@ import java.sql.Time;
 @Embeddable
 public class EventUniqueId implements Serializable {
 
-  @Column String talkingBookId;
-  @Column short year;
-  @Column short updateInYear;
-  @Column short householdRotation;
-  @Column short cycle;
-  @Column short period;
-  @Column short dayInPeriod;
-  @Column Time timeInDay;
+  @Column
+  String talkingBookId;
+  @Column
+  short year;
+  @Column
+  short updateInYear;
+  @Column
+  short householdRotation;
+  @Column
+  short cycle;
+  @Column
+  short period;
+  @Column
+  short dayInPeriod;
+  @Column
+  Time timeInDay;
 
   static public EventUniqueId CreateFromLogLineContext(final LogLineContext context) {
     final EventUniqueId id = new EventUniqueId();
@@ -145,14 +153,14 @@ public class EventUniqueId implements Serializable {
   @Override
   public String toString() {
     return "EventUniqueId{" +
-        "talkingBookId='" + talkingBookId + '\'' +
-        ", year=" + year +
-        ", updateInYear=" + updateInYear +
-        ", householdRotation=" + householdRotation +
-        ", cycle=" + cycle +
-        ", period=" + period +
-        ", dayInPeriod=" + dayInPeriod +
-        ", timeInDay=" + timeInDay +
-        '}';
+      "talkingBookId='" + talkingBookId + '\'' +
+      ", year=" + year +
+      ", updateInYear=" + updateInYear +
+      ", householdRotation=" + householdRotation +
+      ", cycle=" + cycle +
+      ", period=" + period +
+      ", dayInPeriod=" + dayInPeriod +
+      ", timeInDay=" + timeInDay +
+      '}';
   }
 }

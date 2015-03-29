@@ -1,12 +1,13 @@
 package org.literacybridge.content.resolvers;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 
 /**
  */
 public interface ContentResolver {
+
+  ContentInfo loadContent(String contentId) throws IOException;
 
   static public class ContentInfo {
     public final long lastModified;
@@ -21,8 +22,5 @@ public interface ContentResolver {
 
 
   }
-
-
-  ContentInfo loadContent(String contentId) throws IOException;
 
 }

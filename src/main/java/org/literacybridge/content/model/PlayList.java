@@ -4,14 +4,14 @@ import java.util.List;
 
 /**
  * Describes a single playlist, which maps to a single menu the end-user will see.
- *
+ * <p/>
  * Each Playlist contians it category, as well as a list of IDs that uniquely identify the content.
  *
  * @author willpugh
  */
 public class PlayList {
-  String        playlistCategory;
-  List<String>  contentIds;
+  String playlistCategory;
+  List<String> contentIds;
 
   public String getPlaylistCategory() {
     return playlistCategory;
@@ -38,7 +38,7 @@ public class PlayList {
 
     if (contentIds != null ? !contentIds.equals(playList.contentIds) : playList.contentIds != null) return false;
     if (playlistCategory != null ? !playlistCategory.equals(playList.playlistCategory)
-                                 : playList.playlistCategory != null) return false;
+      : playList.playlistCategory != null) return false;
 
     return true;
   }

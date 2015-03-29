@@ -5,8 +5,8 @@ package org.literacybridge.content.model;
  */
 public class Profile {
 
-  String  systemLangauge;
-  String  systemMenu;
+  String systemLangauge;
+  String systemMenu;
   ContentPackage contentPackage;
 
   public String getSystemLangauge() {

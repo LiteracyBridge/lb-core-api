@@ -15,7 +15,10 @@ import java.nio.ByteBuffer;
  */
 public class NORrotation {
   static protected final Logger logger = LoggerFactory.getLogger(NORrotation.class);
-
+  short rotationNumber;
+  short periodNumber;
+  short hoursAfterLastUpdate;
+  short initVoltage;
 
   static public NORrotation parseFromBuffer(ByteBuffer byteBuffer) {
     return parseFromBuffer(byteBuffer, new NORrotation());
@@ -23,9 +26,9 @@ public class NORrotation {
 
   /**
    * Fills in the noRotation structure with the contents from the bytebuffer.
-   *
+   * <p/>
    * If the structId is incorrect, the structure will be filled in, but null will be returned.
-   *
+   * <p/>
    * SIDEEFFECTS:  As a side effect, the bytebuffer will ALWAYS have its position incremented by the
    * size of the NORotation structure.
    *
@@ -44,18 +47,13 @@ public class NORrotation {
       retVal = null;
     }
 
-    noRrotation.rotationNumber        = byteBuffer.getShort();
-    noRrotation.periodNumber          = byteBuffer.getShort();
-    noRrotation.hoursAfterLastUpdate  = byteBuffer.getShort();
-    noRrotation.initVoltage           = byteBuffer.getShort();
+    noRrotation.rotationNumber = byteBuffer.getShort();
+    noRrotation.periodNumber = byteBuffer.getShort();
+    noRrotation.hoursAfterLastUpdate = byteBuffer.getShort();
+    noRrotation.initVoltage = byteBuffer.getShort();
 
     return retVal;
   }
-
-  short rotationNumber;
-  short periodNumber;
-  short hoursAfterLastUpdate;
-  short initVoltage;
 
   public short getRotationNumber() {
     return rotationNumber;

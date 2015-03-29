@@ -7,8 +7,8 @@ import org.literacybridge.stats.model.SyncDirId;
  */
 public class NonMatchingTbDataEntry {
 
-  public final SyncDirId        syncDirId;
-  public final OperationalInfo  operationalInfo;
+  public final SyncDirId syncDirId;
+  public final OperationalInfo operationalInfo;
 
   public NonMatchingTbDataEntry(SyncDirId syncDirId, OperationalInfo operationalInfo) {
     this.syncDirId = syncDirId;
@@ -18,8 +18,8 @@ public class NonMatchingTbDataEntry {
   @Override
   public String toString() {
     return "NonMatchingTbDataEntry{" +
-        "syncDirId=" + syncDirId +
-        ",\noperationalInfo=" + operationalInfo +
-        '}';
+      "syncDirId=" + syncDirId +
+      ",\noperationalInfo=" + operationalInfo +
+      '}';
   }
 }

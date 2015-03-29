@@ -10,13 +10,15 @@ import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.apache.commons.lang.StringUtils;
 import org.literacybridge.stats.api.TalkingBookDataProcessor;
 import org.literacybridge.stats.formats.exceptions.CorruptFileException;
-import org.literacybridge.stats.model.ProcessingContext;
-import org.literacybridge.stats.model.SyncProcessingContext;
 import org.literacybridge.stats.formats.flashData.FlashData;
 import org.literacybridge.stats.formats.flashData.SystemData;
 import org.literacybridge.stats.formats.logFile.LogFileParser;
 import org.literacybridge.stats.formats.statsFile.StatsFile;
+import org.literacybridge.stats.formats.tbData.TbDataParser;
+import org.literacybridge.stats.model.ProcessingContext;
 import org.literacybridge.stats.model.SyncDirId;
+import org.literacybridge.stats.model.SyncProcessingContext;
+import org.literacybridge.stats.model.TbDataLine;
 import org.literacybridge.stats.processors.AbstractDirectoryProcessor;
 import org.literacybridge.utils.FsUtils;
 import org.slf4j.Logger;
@@ -31,33 +33,26 @@ import java.util.*;
 import java.util.regex.Pattern;
 
 /**
-*/
+ */
 public class DirectoryProcessor extends AbstractDirectoryProcessor {
-  protected static final Logger logger = LoggerFactory.getLogger(DirectoryProcessor.class);
-
   public static final Map<String, String> CATEGORY_MAP = ImmutableMap.<String, String>builder()
-                                                                     .put("1", "AGRIC")
-                                                                     .put("1-2", "LIVESTOCK")
-                                                                     .put("2", "HEALTH")
-                                                                     .put("9", "FEEDBACK")
-                                                                     .put("0", "OTHER")
-                                                                     .put("$0-1", "TB")
-                                                                     .build();
-
-
+    .put("1", "AGRIC")
+    .put("1-2", "LIVESTOCK")
+    .put("2", "HEALTH")
+    .put("9", "FEEDBACK")
+    .put("0", "OTHER")
+    .put("$0-1", "TB")
+    .build();
   public static final Pattern ARCHIVED_LOG_PATTERN = Pattern.compile("log_(.*).txt");
-
+  protected static final Logger logger = LoggerFactory.getLogger(DirectoryProcessor.class);
   private static final String statExtension = ".stat";
-  
+
   //Stats files don't have any "."s in them (because they have no file extensions)
-  public static final Pattern STATS_FILE_PATTERN = Pattern.compile("(.*)"+statExtension);
-
-
+  public static final Pattern STATS_FILE_PATTERN = Pattern.compile("(.*)" + statExtension);
+  final List<TalkingBookDataProcessor> dataProcessorEventListeners;
+  final Map<String, String> categoryMap;
   private ProcessingContext currProcessingContext;
   private Set<String> processedLogFiles = new HashSet<>();
-
-  final List<TalkingBookDataProcessor> dataProcessorEventListeners;
-  final Map<String, String>            categoryMap;
 
   public DirectoryProcessor(TalkingBookDataProcessor dataProcessorEventListeners, Map<String, String> categoryMap) {
     this.dataProcessorEventListeners = Lists.newArrayList(dataProcessorEventListeners);
@@ -71,6 +66,126 @@ public class DirectoryProcessor extends AbstractDirectoryProcessor {
     this.categoryMap = categoryMap;
   }
 
+  static public void runCallbacksOnLogFile(File file, LogFileParser parser) throws IOException {
+    FileInputStream fis = new FileInputStream(file);
+    try {
+      parser.parse(file.getAbsolutePath(), fis);
+    } finally {
+      IOUtils.closeQuietly(fis);
+    }
+
+  }
+
+  /**
+   * Loads a FlashData file from a given sync directory.  This file was introduced
+   * in a more recent update, so will not be around for all updates.
+   *
+   * @param syncDir
+   * @return {@null} if the file is not there
+   * @throws java.io.IOException
+   */
+  static public FlashData loadFlashDataFile(File syncDir) throws IOException {
+    final File flashDataFile = new File(syncDir, FsUtils.FsAgnostify("statistics/flashData.bin"));
+
+    FlashData retVal = null;
+    FileInputStream fis = null;
+    try {
+      if (flashDataFile.exists() && flashDataFile.length() == 6708) {
+        fis = new FileInputStream(flashDataFile);
+        retVal = FlashData.parseFromStream(fis);
+
+        LinkedList<String> errors = new LinkedList<>();
+        if (!retVal.isValid(errors)) {
+          logger.error("Flashdata file look possibly corrupt.  Errors=" + StringUtils.join(errors, "; ") + "Path=" + flashDataFile.getCanonicalPath() + " FlashData=" + retVal.toString());
+        }
+      }
+    } finally {
+      IOUtils.closeQuietly(fis);
+    }
+
+    return retVal;
+  }
+
+  static public String findContentIdByPackage(File syncDir, String defaultContentId) {
+    File systemDir = new File(syncDir, "system");
+
+    String bestContentId = defaultContentId;
+    if (systemDir.exists()) {
+      FileFilter fileFilter = new WildcardFileFilter("*.pkg");
+      File[] files = systemDir.listFiles(fileFilter);
+      for (File file : files) {
+        bestContentId = file.getName().substring(0, file.getName().length() - 4);
+      }
+    }
+    return bestContentId;
+  }
+
+  /**
+   * Creates a processing context.  There are two ways to do this:
+   * <p/>
+   * <ol>
+   * <li>Use the flashData.bin file and get the info there there.  This is the MOST reliable way to get some stat, since this info comes from the NOR flash on the
+   * device, which tends to have corruption a lot less.  The only problem is that this is a newer mechanism and so there are a lot of times this file does not exist.
+   * </li>
+   * <li>
+   * Use the filepath conventions to figure this out.  This way always exists, but this information ultimately comes from memory on the device that we have seen
+   * corruption occur in.  However, for some information such as talkingBook ID, contentUpdate and village name, this can be the best way, because we have other
+   * mechanisms to fix corruption here.
+   * </li>
+   * </ol>
+   *
+   * @param syncDevice    The name of the device this information is being synched from.  THis is NOT the TalkingBook, this is the laptop or
+   *                      tablet used to sync many talking books.
+   * @param syncDir       The directory this sync is occuring from.
+   * @param talkingBookId the ID of the talking book, as determined from the file system
+   * @param contentUpdate the update string, as determined from the file system
+   * @param villageName   the village name the talking book was deployed in, as determined from the file system
+   * @param flashData     the flashdata file, if it exists for this sync.
+   * @return
+   */
+  static public SyncProcessingContext determineProcessingContext(String syncDevice, File syncDir, String talkingBookId,
+                                                                 String contentUpdate, String villageName, @Nullable FlashData flashData) {
+
+    //First, find the best content ID
+    String bestContentPackage = contentUpdate;
+    if (flashData != null) {
+      final SystemData systemData = flashData.getSystemData();
+      if (StringUtils.isNotEmpty(systemData.getContentPackage())) {
+        bestContentPackage = systemData.getContentPackage();
+      }
+    }
+
+    //If the best contentID was unchanged, check for the pkg file
+    if (bestContentPackage == contentUpdate) {
+      bestContentPackage = findContentIdByPackage(syncDir, bestContentPackage);
+    }
+
+
+    SyncProcessingContext retVal = new SyncProcessingContext(syncDir.getName(),
+      talkingBookId,
+      villageName,
+      StringUtils.defaultIfEmpty(bestContentPackage, contentUpdate),
+      contentUpdate,
+      syncDevice);
+
+    return retVal;
+  }
+
+  @Override
+  public boolean startDeviceOperationalData(String device) {
+    return true;
+  }
+
+  @Override
+  public void processTbDataFile(File tbdataFile, boolean includesHeaders) throws IOException {
+    TbDataParser parser = new TbDataParser();
+    List<TbDataLine> lines = parser.parseTbDataFile(tbdataFile, true);
+    for (TbDataLine line : lines) {
+      for (TalkingBookDataProcessor processor : dataProcessorEventListeners) {
+        processor.processTbDataLine(line);
+      }
+    }
+  }
 
   @Override
   public boolean startTalkingBook(String talkingBook) throws Exception {
@@ -98,7 +213,6 @@ public class DirectoryProcessor extends AbstractDirectoryProcessor {
     super.endTalkingBook();
   }
 
-
   @Override
   public void processSyncDir(SyncDirId syncDirId, File syncDir) throws Exception {
     final FlashData flashData = loadFlashDataFile(syncDir);
@@ -115,10 +229,10 @@ public class DirectoryProcessor extends AbstractDirectoryProcessor {
    * Processes a FlashData file to call all the registered callbacks.
    *
    * @param syncProcessingContext context this processing occurs in
-   * @param flashData the flashdata file.  If this is null, this function will be a no-op.
+   * @param flashData             the flashdata file.  If this is null, this function will be a no-op.
    */
   public void processFlashData(final SyncProcessingContext syncProcessingContext, @Nullable final FlashData flashData) throws
-                                                                                                                       IOException {
+    IOException {
     if (flashData != null) {
       for (TalkingBookDataProcessor events : dataProcessorEventListeners) {
         events.processFlashData(syncProcessingContext, flashData);
@@ -145,7 +259,7 @@ public class DirectoryProcessor extends AbstractDirectoryProcessor {
    */
   public void processSyncDir(final File syncDir, final SyncProcessingContext syncProcessingContext,
                              final Set<String> processedFiles, final boolean processInProcessLog) throws
-                                                                                                  IOException {
+    IOException {
 
 
     //Create a list of LogFileParsers that take the callback interfaces and the syncProcessingContexts.
@@ -163,8 +277,8 @@ public class DirectoryProcessor extends AbstractDirectoryProcessor {
     final File logArchives = new File(syncDir, "log-archive");
     if (logArchives.isDirectory()) {
       final Iterator<File> archivedLogFiles = FileUtils.iterateFiles(logArchives,
-                                                                     new RegexFileFilter(ARCHIVED_LOG_PATTERN),
-                                                                     FalseFileFilter.FALSE);
+        new RegexFileFilter(ARCHIVED_LOG_PATTERN),
+        FalseFileFilter.FALSE);
       while (archivedLogFiles.hasNext()) {
         final File archivedFile = archivedLogFiles.next();
         processLogFile(archivedFile, parser, processedFiles);
@@ -175,14 +289,14 @@ public class DirectoryProcessor extends AbstractDirectoryProcessor {
     final File statDir = new File(syncDir, "statistics");
     // TODO: replace the line above with the line below after processing 2014-3
     // (The stats folder is no longer used on TB; all stats in statistics.
-    //  TB Loader has been compensating by copying into a stats subdirectory 
-    //  just for backward compatibilty; but that compensation appears not to 
+    //  TB Loader has been compensating by copying into a stats subdirectory
+    //  just for backward compatibilty; but that compensation appears not to
     //  have happened in first MEDA update).
     //final File statDir = new File(syncDir, "statistics");
     if (statDir.canRead()) {
       if (statDir.isDirectory()) {
         final Iterator<File> statsFiles = FileUtils.iterateFiles(statDir, new RegexFileFilter(STATS_FILE_PATTERN),
-                                                                 FalseFileFilter.FALSE);
+          FalseFileFilter.FALSE);
         while (statsFiles.hasNext()) {
           runCallbacksOnStatsFile(syncProcessingContext, statsFiles.next());
         }
@@ -194,7 +308,6 @@ public class DirectoryProcessor extends AbstractDirectoryProcessor {
     }
   }
 
-
   public void processLogFile(File file, LogFileParser parser, Set<String> processedFiles) {
 
     final String fileProcessingName = file.getParent() + "/" + file.getName();
@@ -204,21 +317,11 @@ public class DirectoryProcessor extends AbstractDirectoryProcessor {
         processedFiles.add(fileProcessingName);
       } catch (IOException ioe) {
         final String errorString = String.format("Unable to process %s.  Error=%s", file.getAbsolutePath(),
-                                                 ioe.getMessage());
+          ioe.getMessage());
         logger.error(errorString, ioe);
       }
 
     }
-  }
-
-  static public void runCallbacksOnLogFile(File file, LogFileParser parser) throws IOException {
-    FileInputStream fis = new FileInputStream(file);
-    try {
-      parser.parse(file.getAbsolutePath(), fis);
-    } finally {
-      IOUtils.closeQuietly(fis);
-    }
-
   }
 
   public void runCallbacksOnStatsFile(final SyncProcessingContext syncProcessingContext, final File file) {
@@ -229,10 +332,10 @@ public class DirectoryProcessor extends AbstractDirectoryProcessor {
       try {
         StatsFile statsFile = StatsFile.read(fis);
         for (TalkingBookDataProcessor callbacks : dataProcessorEventListeners) {
-        	int delimeterPosition = file.getName().indexOf('^');
-        	String contentId = file.getName().substring(delimeterPosition+1,file.getName().length()-statExtension.length());
-        	String packageName = file.getName().substring(0,delimeterPosition);  // not used right now but should be checked against processing context     
-            callbacks.processStatsFile(syncProcessingContext, contentId, statsFile);
+          int delimeterPosition = file.getName().indexOf('^');
+          String contentId = file.getName().substring(delimeterPosition + 1, file.getName().length() - statExtension.length());
+          String packageName = file.getName().substring(0, delimeterPosition);  // not used right now but should be checked against processing context
+          callbacks.processStatsFile(syncProcessingContext, contentId, statsFile);
         }
       } catch (CorruptFileException e) {
         for (TalkingBookDataProcessor callbacks : dataProcessorEventListeners) {
@@ -243,102 +346,6 @@ public class DirectoryProcessor extends AbstractDirectoryProcessor {
       logger.error("Could not load stats file", e);
     }
 
-  }
-
-
-  /**
-   * Loads a FlashData file from a given sync directory.  This file was introduced
-   * in a more recent update, so will not be around for all updates.
-   *
-   * @param syncDir
-   * @return {@null} if the file is not there
-   * @throws java.io.IOException
-   */
-  static public FlashData loadFlashDataFile(File syncDir) throws IOException {
-    final File flashDataFile = new File(syncDir, FsUtils.FsAgnostify("statistics/flashData.bin"));
-
-    FlashData       retVal  = null;
-    FileInputStream fis     = null;
-    try {
-      if (flashDataFile.exists() && flashDataFile.length() == 6708) {
-        fis = new FileInputStream(flashDataFile);
-        retVal = FlashData.parseFromStream(fis);
-
-        LinkedList<String> errors = new LinkedList<>();
-        if (!retVal.isValid(errors)) {
-          logger.error("Flashdata file look possibly corrupt.  Errors=" + StringUtils.join(errors, "; ") + "Path=" + flashDataFile.getCanonicalPath() + " FlashData=" + retVal.toString());
-        }
-      }
-    } finally {
-      IOUtils.closeQuietly(fis);
-    }
-
-    return retVal;
-  }
-
-  static public String findContentIdByPackage(File syncDir, String defaultContentId) {
-    File  systemDir = new File(syncDir, "system");
-
-    String bestContentId = defaultContentId;
-    if (systemDir.exists()) {
-      FileFilter fileFilter = new WildcardFileFilter("*.pkg");
-      File[] files = systemDir.listFiles(fileFilter);
-      for (File file : files) {
-        bestContentId = file.getName().substring(0, file.getName().length() - 4);
-      }
-    }
-    return bestContentId;
-  }
-
-  /**
-   * Creates a processing context.  There are two ways to do this:
-   *
-   * <ol>
-   *   <li>Use the flashData.bin file and get the info there there.  This is the MOST reliable way to get some stat, since this info comes from the NOR flash on the
-   *   device, which tends to have corruption a lot less.  The only problem is that this is a newer mechanism and so there are a lot of times this file does not exist.
-   *   </li>
-   *   <li>
-   *     Use the filepath conventions to figure this out.  This way always exists, but this information ultimately comes from memory on the device that we have seen
-   *     corruption occur in.  However, for some information such as talkingBook ID, contentUpdate and village name, this can be the best way, because we have other
-   *     mechanisms to fix corruption here.
-   *   </li>
-   * </ol>
-   *
-   * @param syncDevice The name of the device this information is being synched from.  THis is NOT the TalkingBook, this is the laptop or
-   *                   tablet used to sync many talking books.
-   * @param syncDir    The directory this sync is occuring from.
-   * @param talkingBookId the ID of the talking book, as determined from the file system
-   * @param contentUpdate the update string, as determined from the file system
-   * @param villageName the village name the talking book was deployed in, as determined from the file system
-   * @param flashData the flashdata file, if it exists for this sync.
-   * @return
-   */
-  static public SyncProcessingContext determineProcessingContext(String syncDevice, File syncDir, String talkingBookId,
-                                                                 String contentUpdate, String villageName, @Nullable FlashData flashData) {
-
-    //First, find the best content ID
-    String bestContentPackage = contentUpdate;
-    if (flashData != null) {
-      final SystemData systemData =  flashData.getSystemData();
-      if (StringUtils.isNotEmpty(systemData.getContentPackage())) {
-        bestContentPackage = systemData.getContentPackage();
-      }
-    }
-
-    //If the best contentID was unchanged, check for the pkg file
-    if (bestContentPackage == contentUpdate) {
-      bestContentPackage = findContentIdByPackage(syncDir, bestContentPackage);
-    }
-
-
-    SyncProcessingContext retVal = new SyncProcessingContext(syncDir.getName(),
-        talkingBookId,
-        villageName,
-        StringUtils.defaultIfEmpty(bestContentPackage, contentUpdate),
-        contentUpdate,
-        syncDevice);
-
-    return retVal;
   }
 
 }

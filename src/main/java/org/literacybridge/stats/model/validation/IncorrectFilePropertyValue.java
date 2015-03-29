@@ -14,10 +14,10 @@ public class IncorrectFilePropertyValue extends IncorrectPropertyValue {
   @Override
   public String toString() {
     return "IncorrectFilePropertyValue{" +
-        "lineNumber=" + lineNumber +
-        ", propertyName='" + propertyName + '\'' +
-        ", expectedValue='" + expectedValue + '\'' +
-        ", actualValue='" + actualValue + '\'' +
-        '}';
+      "lineNumber=" + lineNumber +
+      ", propertyName='" + propertyName + '\'' +
+      ", expectedValue='" + expectedValue + '\'' +
+      ", actualValue='" + actualValue + '\'' +
+      '}';
   }
 }

@@ -12,7 +12,7 @@ import java.util.Collection;
 /**
  * Contains all the per-message stats that are tracked for a piece of content in the NOR flash.  If you need other stats,
  * you probably need to extract the from the logs by creating a new AbstractLogProcessor
- *
+ * <p/>
  * This class mirrors the C-structure with the same name in https://code.google.com/p/literacybridge/source/browse/device/software/device/trunk/firmware/Application/TalkingBook/Include/filestats.h
  *
  * @author willpugh
@@ -20,10 +20,25 @@ import java.util.Collection;
 public class NORmsgStats {
 
   static protected final Logger logger = LoggerFactory.getLogger(NORmsgStats.class);
+  private boolean isEmpty;
+  private String contentId;
+  private short indexMsg;
+  private short numberProfile;
+  private short numberRotation;
+  private short countStarted;
+  private short countQuarter;
+  private short countHalf;
+  private short countThreequarters;
+  private short countCompleted;
+  private short countApplied;
+  private short countUseless;
+  private int totalSecondsPlayed;
 
-    public static NORmsgStats parseFromBuffer(String contentId, ByteBuffer byteBuffer) { return parseFromBuffer(contentId, byteBuffer, new NORmsgStats()); }
+  public static NORmsgStats parseFromBuffer(String contentId, ByteBuffer byteBuffer) {
+    return parseFromBuffer(contentId, byteBuffer, new NORmsgStats());
+  }
 
-    public static NORmsgStats parseFromBuffer(String contentId, ByteBuffer byteBuffer, NORmsgStats normsgStats) {
+  public static NORmsgStats parseFromBuffer(String contentId, ByteBuffer byteBuffer, NORmsgStats normsgStats) {
 
     short structId = byteBuffer.getShort();
     if (structId != FirmwareConstants.NOR_STRUCT_ID_MESSAGE_STATS && structId != FirmwareConstants.NOR_STRUCT_ID_NO_MESSAGE_STATS) {
@@ -32,7 +47,7 @@ public class NORmsgStats {
 
     //If we got a NOR_STRUCT_ID_NO_MESSAGE_STATS instead of a NOR_STRUCT_ID_MESSAGE_STATS, it means this is an empty record.
     //It should still be property initialized to 0.
-    normsgStats.isEmpty =  (structId != FirmwareConstants.NOR_STRUCT_ID_MESSAGE_STATS);
+    normsgStats.isEmpty = (structId != FirmwareConstants.NOR_STRUCT_ID_MESSAGE_STATS);
     normsgStats.contentId = contentId;
     normsgStats.indexMsg = byteBuffer.getShort();
     normsgStats.numberProfile = byteBuffer.getShort();
@@ -49,26 +64,10 @@ public class NORmsgStats {
     return normsgStats;
   }
 
-
-  private boolean   isEmpty;
-  private String    contentId;
-  private short     indexMsg;
-  private short		numberProfile;
-  private short     numberRotation;
-  private short     countStarted;
-  private short     countQuarter;
-  private short     countHalf;
-  private short     countThreequarters;
-  private short     countCompleted;
-  private short     countApplied;
-  private short     countUseless;
-  private int       totalSecondsPlayed;
-
-
   public boolean isValid(Collection<String> errors) {
     if (isEmpty) return true;
 
-    return  FlashData.doValidate(StringUtils.isNotEmpty(contentId),     errors, "ContentID is empty in the NORmsgStats");
+    return FlashData.doValidate(StringUtils.isNotEmpty(contentId), errors, "ContentID is empty in the NORmsgStats");
   }
 
   public boolean isEmpty() {
@@ -100,7 +99,7 @@ public class NORmsgStats {
   }
 
   public void setNumberProfile(short numberProfile) {
-	this.numberProfile = numberProfile;
+    this.numberProfile = numberProfile;
   }
 
   public short getNumberRotation() {
@@ -251,21 +250,22 @@ public class NORmsgStats {
     return result;
   }
 
-  @Override public String toString() {
+  @Override
+  public String toString() {
     return new ToStringBuilder(this)
-        .append("isEmpty", isEmpty)
-        .append("contentId", contentId)
-        .append("indexMsg", indexMsg)
-        .append("numberProfile", numberProfile)
-        .append("numberRotation", numberRotation)
-        .append("countStarted", countStarted)
-        .append("countQuarter", countQuarter)
-        .append("countHalf", countHalf)
-        .append("countThreequarters", countThreequarters)
-        .append("countCompleted", countCompleted)
-        .append("countApplied", countApplied)
-        .append("countUseless", countUseless)
-        .append("totalSecondsPlayed", totalSecondsPlayed)
-        .toString();
+      .append("isEmpty", isEmpty)
+      .append("contentId", contentId)
+      .append("indexMsg", indexMsg)
+      .append("numberProfile", numberProfile)
+      .append("numberRotation", numberRotation)
+      .append("countStarted", countStarted)
+      .append("countQuarter", countQuarter)
+      .append("countHalf", countHalf)
+      .append("countThreequarters", countThreequarters)
+      .append("countCompleted", countCompleted)
+      .append("countApplied", countApplied)
+      .append("countUseless", countUseless)
+      .append("totalSecondsPlayed", totalSecondsPlayed)
+      .toString();
   }
 }

@@ -9,16 +9,13 @@ import java.util.Comparator;
 /**
  * Represents a tuple of a Device (such as a laptop or android device, NOT a talking book), and a
  * deployment.
- *
+ * <p/>
  * The main reason for this abstraction is that between the archive format and the syncing format, almost
  * all of the directory structure is the same, except the device/deployment hierarchy.
  */
 public class DeploymentPerDevice {
   public final String deployment;
   public final String device;
-  public final DeploymentId deploymentId;
-
-
   public static final Comparator<DeploymentPerDevice> ORDER_BY_DEVICE = new Comparator<DeploymentPerDevice>() {
     @Override
     public int compare(DeploymentPerDevice o1, DeploymentPerDevice o2) {
@@ -32,7 +29,6 @@ public class DeploymentPerDevice {
       return o1.deployment.compareToIgnoreCase(o2.deployment);
     }
   };
-
   public static final Comparator<DeploymentPerDevice> ORDER_BY_DEPLOY = new Comparator<DeploymentPerDevice>() {
     @Override
     public int compare(DeploymentPerDevice o1, DeploymentPerDevice o2) {
@@ -46,6 +42,7 @@ public class DeploymentPerDevice {
       return o1.device.compareToIgnoreCase(o2.device);
     }
   };
+  public final DeploymentId deploymentId;
 
   public DeploymentPerDevice(String deployment, String device) {
     this.deployment = deployment;
@@ -59,7 +56,7 @@ public class DeploymentPerDevice {
 
   public File getSyncRoot(File basePath) {
     return new File(basePath, FsUtils.FsAgnostify(
-        device + "/" + DirectoryIterator.UPDATE_ROOT_V1 + "/" + deployment));
+      device + "/" + DirectoryIterator.UPDATE_ROOT_V1 + "/" + deployment));
   }
 
   public File getArchiveRoot(File basePath) {

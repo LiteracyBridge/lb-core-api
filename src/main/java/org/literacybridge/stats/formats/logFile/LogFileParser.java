@@ -22,8 +22,6 @@ import java.util.regex.Pattern;
  */
 public class LogFileParser {
 
-  static protected final Logger logger = LoggerFactory.getLogger(LogFileParser.class);
-
   /**
    * Matches a line that we are able to process.  Will try to be fairly forgiving in terms of what it accepts.
    * For example, the line:
@@ -34,7 +32,6 @@ public class LogFileParser {
    * [2r0096c008p023d18h18m53s401/314/314V]:[PLAY] [TB000248_372AB558 @VOL=03 @Volt=314]
    */
   public static final Pattern LOG_LINE_PATTERN = Pattern.compile("([^:]*):(\\w+):*\\s*(.*)");
-
   /**
    * This matches the beginning of log lines that look like :
    * 2r0096c008p023d18h18m49s357/314/314V
@@ -58,13 +55,11 @@ public class LogFileParser {
    * </ol>
    */
   public static final Pattern LOG_LINE_START_PATTERN = Pattern.compile(
-      "(0|(\\d+)r)(\\d+)c(\\d+)p\\D*(\\d+)d(\\d+)h(\\d+)m(\\d+)s(\\d+)/(\\d+)/(\\d+)V");
-
+    "(0|(\\d+)r)(\\d+)c(\\d+)p\\D*(\\d+)d(\\d+)h(\\d+)m(\\d+)s(\\d+)/(\\d+)/(\\d+)V");
   /**
    * This matches the newer log line format that begins with a 0p
    */
   public static final Pattern NEW_LINE_PATTERN = Pattern.compile("\\d+p(.*)");
-
   /**
    * Matches the rest of the PLAY event, after the parts are pulled out from LOG_LINE_PATTERN +  LOG_LINE_START_PATTERN
    * <p/>
@@ -75,8 +70,6 @@ public class LogFileParser {
    * [00046a_9_4E7A864E] @VOL=[03] @Volt=[250]
    */
   public static final Pattern REST_OF_PLAY = Pattern.compile("(\\S+)\\s+@VOL=(\\d+)\\s+@Volt=(\\S+)\\s*");
-
-
   /**
    * Matches the rest of the PLAYED event, after the parts are pulled out from LOG_LINE_PATTERN +  LOG_LINE_START_PATTERN
    * <p/>
@@ -87,9 +80,7 @@ public class LogFileParser {
    * [00046a_9_F70FDD0B] [0002]/[0001]sec @VOL=[01] @Volt=[202-Ended]
    */
   public static final Pattern REST_OF_PLAYED = Pattern.compile(
-      "(\\S+)\\s+(\\d+)/(\\d+)sec\\s+@VOL=(\\d+)\\s+@Volt=(\\S+)\\s*");
-
-
+    "(\\S+)\\s+(\\d+)/(\\d+)sec\\s+@VOL=(\\d+)\\s+@Volt=(\\S+)\\s*");
   /**
    * Matches the rest of the RECORD event, after the parts are pulled out from LOG_LINE_PATTERN +  LOG_LINE_START_PATTERN
    * <p/>
@@ -100,8 +91,6 @@ public class LogFileParser {
    * [00046a_9_7F67F127] -> [9]
    */
   public static final Pattern REST_OF_RECORD = Pattern.compile("(\\S+)\\s+->\\s+(\\d+)\\s*");
-
-
   /**
    * Matches the rest of the TIME RECORD event, after the parts are pulled out from LOG_LINE_PATTERN +  LOG_LINE_START_PATTERN
    * <p/>
@@ -112,8 +101,6 @@ public class LogFileParser {
    * RECORDED (secs): [0004]
    */
   public static final Pattern REST_OF_RECORDED = Pattern.compile("RECORDED\\s+\\(secs\\):\\s*(\\d+)\\s*");
-
-
   /**
    * Matches the pattern for a VOLTAGE DROP.  This can happen during any of the other patterns
    * <p/>
@@ -124,11 +111,10 @@ public class LogFileParser {
    * VOLTAGE DROP: [0.02]v in [0003] sec
    */
   public static final Pattern VOLTAGE_DROP = Pattern.compile("VOLTAGE DROP:\\s*([0-9.]+)v\\s*in\\s*(\\d+)\\s+sec");
-
-
+  static protected final Logger logger = LoggerFactory.getLogger(LogFileParser.class);
   private final Collection<TalkingBookDataProcessor> eventCallbacks;
-  private final SyncProcessingContext                context;
-  private final Map<String, String>                  categoryMap;
+  private final SyncProcessingContext context;
+  private final Map<String, String> categoryMap;
 
   //Last piece of content played
   private String contentLastPlayed = "";
@@ -147,6 +133,20 @@ public class LogFileParser {
     this.categoryMap = categoryMap;
   }
 
+  static boolean checkForMatch(String action, String args, LogFilePosition filePosition, Matcher matcher) {
+    if (!matcher.matches()) {
+
+      //If this is not a feedback message, mark as being an error
+      if (!"Feedback".equalsIgnoreCase(args)) {
+        final String errorString = String.format("%s : %d - Cannot match arguments in %s action. Args=%s",
+          filePosition.fileName, filePosition.lineNumber, action, args);
+        logger.error(errorString);
+      }
+
+      return false;
+    }
+    return true;
+  }
 
   protected void clearParseState() {
     contentLastPlayed = "";
@@ -198,7 +198,7 @@ public class LogFileParser {
       logLineInfo = parseLogLineInfo(line);
     } catch (NumberFormatException e) {
       final String errorString = String.format("%s : %d - Invalid number in log info. Line=%s, Error=%s", fileName,
-                                               lineNumber, line, e.getMessage());
+        lineNumber, line, e.getMessage());
       logger.error(errorString);
     }
 
@@ -247,7 +247,7 @@ public class LogFileParser {
     final LocalTime periodTime = new LocalTime(hourOfPeriod, minuteOfPeriod, secondOfPeriod);
 
     return new LogLineInfo(rotation, cycle, period, dayOfPeriod, periodTime, highestVoltage, steadyStateVoltage,
-                           lowestVoltage);
+      lowestVoltage);
   }
 
   public void parseAction(final String fileName, final int lineNumber, final String preludeString, final String action,
@@ -342,8 +342,8 @@ public class LogFileParser {
       }
     } catch (NumberFormatException e) {
       final String errorString = String.format("%s : %d - Invalid number in Play action. Args=%s, Error=%s",
-                                               logLineContext.logFilePosition.fileName,
-                                               logLineContext.logFilePosition.lineNumber, args, e.getMessage());
+        logLineContext.logFilePosition.fileName,
+        logLineContext.logFilePosition.lineNumber, args, e.getMessage());
       logger.error(errorString);
     }
 
@@ -374,8 +374,8 @@ public class LogFileParser {
       }
     } catch (NumberFormatException e) {
       final String errorString = String.format("%s : %d - Invalid number in Played action. Args=%s, Error=%s",
-                                               logLineContext.logFilePosition.fileName,
-                                               logLineContext.logFilePosition.lineNumber, args, e.getMessage());
+        logLineContext.logFilePosition.fileName,
+        logLineContext.logFilePosition.lineNumber, args, e.getMessage());
       logger.error(errorString);
     }
 
@@ -411,8 +411,8 @@ public class LogFileParser {
       }
     } catch (NumberFormatException e) {
       final String errorString = String.format("%s : %d - Invalid number in Record action. Args=%s, Error=%s",
-                                               logLineContext.logFilePosition.fileName,
-                                               logLineContext.logFilePosition.lineNumber, args, e.getMessage());
+        logLineContext.logFilePosition.fileName,
+        logLineContext.logFilePosition.lineNumber, args, e.getMessage());
       logger.error(errorString);
     }
 
@@ -431,8 +431,8 @@ public class LogFileParser {
       }
     } catch (NumberFormatException e) {
       final String errorString = String.format("%s : %d - Invalid number in Record action. Args=%s, Error=%s",
-                                               logLineContext.logFilePosition.fileName,
-                                               logLineContext.logFilePosition.lineNumber, args, e.getMessage());
+        logLineContext.logFilePosition.fileName,
+        logLineContext.logFilePosition.lineNumber, args, e.getMessage());
       logger.error(errorString);
     }
   }
@@ -440,8 +440,8 @@ public class LogFileParser {
   protected void processSurvey(LogLineContext logLineContext, String args) {
     if (args == null) {
       final String errorString = String.format("%s : %d - No argument for Survey action.",
-                                               logLineContext.logFilePosition.fileName,
-                                               logLineContext.logFilePosition.lineNumber);
+        logLineContext.logFilePosition.fileName,
+        logLineContext.logFilePosition.lineNumber);
       logger.error(errorString);
     }
 
@@ -459,24 +459,9 @@ public class LogFileParser {
       }
     } else {
       final String errorString = String.format("%s : %d - Invalid argument for Surveyaction. Args=%s",
-                                               logLineContext.logFilePosition.fileName,
-                                               logLineContext.logFilePosition.lineNumber, args);
+        logLineContext.logFilePosition.fileName,
+        logLineContext.logFilePosition.lineNumber, args);
       logger.error(errorString);
     }
-  }
-
-  static boolean checkForMatch(String action, String args, LogFilePosition filePosition, Matcher matcher) {
-    if (!matcher.matches()) {
-
-      //If this is not a feedback message, mark as being an error
-      if (!"Feedback".equalsIgnoreCase(args)) {
-        final String errorString = String.format("%s : %d - Cannot match arguments in %s action. Args=%s",
-                                                 filePosition.fileName, filePosition.lineNumber, action, args);
-        logger.error(errorString);
-      }
-
-      return false;
-    }
-    return true;
   }
 }

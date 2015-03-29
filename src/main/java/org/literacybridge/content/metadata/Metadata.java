@@ -19,7 +19,7 @@ public class Metadata {
   public final String contentId;
 
   @Nonnull
-  public final Map<String, List<String>>   properties;
+  public final Map<String, List<String>> properties;
 
   public Metadata(@Nonnull String contentId, @Nonnull Map<String, List<String>> properties) {
     this.contentId = contentId;

@@ -11,8 +11,10 @@ import javax.persistence.Table;
 @Table(name = "recordevents")
 public class RecordEvent extends Event {
 
-  @Column private String contentId;
-  @Column private int secondsRecorded;
+  @Column
+  private String contentId;
+  @Column
+  private int secondsRecorded;
 
   public String getContentId() {
     return contentId;

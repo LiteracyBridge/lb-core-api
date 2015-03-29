@@ -10,8 +10,10 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "surveyevents")
 public class SurveyEvent extends Event {
-  @Column private String contentId;
-  @Column private Boolean isUseful;
+  @Column
+  private String contentId;
+  @Column
+  private Boolean isUseful;
 
   public String getContentId() {
     return contentId;

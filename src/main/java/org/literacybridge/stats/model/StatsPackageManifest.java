@@ -12,13 +12,13 @@ import java.util.Map;
  */
 public class StatsPackageManifest {
 
-  public final int   formatVersion;
+  public final int formatVersion;
   public final Map<String, SyncRange> devices;
 
   @JsonCreator
   public StatsPackageManifest(@JsonProperty(value = "formatVersion") int formatVersion,
                               @JsonProperty(value = "devices") Map<String, SyncRange> devices) {
     this.formatVersion = formatVersion;
-    this.devices = devices != null ?  Collections.unmodifiableMap(devices) : Collections.EMPTY_MAP;
+    this.devices = devices != null ? Collections.unmodifiableMap(devices) : Collections.EMPTY_MAP;
   }
 }

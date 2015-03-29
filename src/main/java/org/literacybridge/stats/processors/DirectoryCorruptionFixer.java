@@ -14,14 +14,13 @@ import java.util.List;
 
 /**
  * Takes a list of validation errors and fixes up what errors in can.
- *
  */
 public class DirectoryCorruptionFixer {
   protected static final Logger logger = LoggerFactory.getLogger(DirectoryCorruptionFixer.class);
 
-  public final File            root;
+  public final File root;
   public final DirectoryFormat format;
-  public final boolean         strict;
+  public final boolean strict;
 
   public DirectoryCorruptionFixer(File root, DirectoryFormat format, boolean strict) {
     this.root = root;
@@ -43,9 +42,9 @@ public class DirectoryCorruptionFixer {
 
     List<ValidationError> unprocessedErrors = new ArrayList<>();
     //Do deletes first
-    for (ValidationError  error : errors) {
+    for (ValidationError error : errors) {
       if (error.errorId == ValidationError.EMPTY_SYNC_DIRECTORY) {
-        EmptySyncDirectory  emptySyncDirectory = (EmptySyncDirectory) error;
+        EmptySyncDirectory emptySyncDirectory = (EmptySyncDirectory) error;
         boolean retVal = emptySyncDirectory.syncDir.delete();
         if (!retVal) {
           logger.error("Unable to delete empty directory : " + emptySyncDirectory.syncDir);
@@ -54,7 +53,7 @@ public class DirectoryCorruptionFixer {
       }
     }
 
-    for (ValidationError  error : errors) {
+    for (ValidationError error : errors) {
       switch (error.errorId) {
         case ValidationError.INVALID_SYNC_DIR_PATH:
           if (!fixInvalidPathError((InvalidSyncDirError) error)) {
@@ -72,7 +71,7 @@ public class DirectoryCorruptionFixer {
     return unprocessedErrors;
   }
 
-  public boolean fixInvalidPathError(InvalidSyncDirError  error) {
+  public boolean fixInvalidPathError(InvalidSyncDirError error) {
 
     error.expectedPath.getParentFile().mkdirs();
     boolean retVal = error.currPath.renameTo(error.expectedPath);
@@ -87,7 +86,7 @@ public class DirectoryCorruptionFixer {
         logger.error("Unable to move from " + error.currPath + " to " + error.expectedPath);
       }
     } else {
-      logger.info("Fixed-up directory by moving from "+ error.currPath + " to " + error.expectedPath);
+      logger.info("Fixed-up directory by moving from " + error.currPath + " to " + error.expectedPath);
     }
     return retVal;
   }

@@ -12,13 +12,19 @@ import java.io.Serializable;
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 abstract public class Event implements Serializable {
 
-  @EmbeddedId private EventUniqueId idFields;
+  @EmbeddedId
+  private EventUniqueId idFields;
 
-  @Column private double maxVolts;
-  @Column private double steadyStateVolts;
-  @Column private double minVolts;
-  @Column private String packageId;
-  @Column private String village;
+  @Column
+  private double maxVolts;
+  @Column
+  private double steadyStateVolts;
+  @Column
+  private double minVolts;
+  @Column
+  private String packageId;
+  @Column
+  private String village;
 
   public static void populateEvent(final LogLineContext context, final Event event) {
     event.setIdFields(EventUniqueId.CreateFromLogLineContext(context));

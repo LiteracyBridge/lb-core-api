@@ -5,8 +5,8 @@ import org.joda.time.LocalDateTime;
 /**
  */
 public class OperationalInfo {
-  public final String        deviceName;
-  public final String        syncDirName;
+  public final String deviceName;
+  public final String syncDirName;
   public final LocalDateTime dateTimeOfSync;
 
   public final String inTalkingBook;
@@ -38,15 +38,15 @@ public class OperationalInfo {
   @Override
   public String toString() {
     return "OperationalInfo{" +
-        "deviceName='" + deviceName + '\'' +
-        ", syncDirName='" + syncDirName + '\'' +
-        ", dateTimeOfSync=" + dateTimeOfSync +
-        ", inTalkingBook='" + inTalkingBook + '\'' +
-        ", outTalkingBook='" + outTalkingBook + '\'' +
-        ", inDeploymentId='" + inDeploymentId + '\'' +
-        ", outDeploymentId='" + outDeploymentId + '\'' +
-        ", inVillage='" + inVillage + '\'' +
-        ", outVillage='" + outVillage + '\'' +
-        '}';
+      "deviceName='" + deviceName + '\'' +
+      ", syncDirName='" + syncDirName + '\'' +
+      ", dateTimeOfSync=" + dateTimeOfSync +
+      ", inTalkingBook='" + inTalkingBook + '\'' +
+      ", outTalkingBook='" + outTalkingBook + '\'' +
+      ", inDeploymentId='" + inDeploymentId + '\'' +
+      ", outDeploymentId='" + outDeploymentId + '\'' +
+      ", inVillage='" + inVillage + '\'' +
+      ", outVillage='" + outVillage + '\'' +
+      '}';
   }
 }

@@ -19,8 +19,8 @@ public class ValidationError {
   public static final int EMPTY_SYNC_DIRECTORY = 12;
 
 
-  public final String   errorMessage;
-  public final int      errorId;
+  public final String errorMessage;
+  public final int errorId;
 
   public ValidationError(String errorMessage, int errorId) {
     this.errorMessage = errorMessage;
@@ -30,8 +30,8 @@ public class ValidationError {
   @Override
   public String toString() {
     return "ValidationError{" +
-        "errorMessage='" + errorMessage + '\'' +
-        ", errorId=" + errorId +
-        '}';
+      "errorMessage='" + errorMessage + '\'' +
+      ", errorId=" + errorId +
+      '}';
   }
 }

@@ -27,26 +27,26 @@ public class TestValidatingProcessor {
   public void testValidArchiveNoManifest() throws Exception {
     ValidatingProcessor validatingProcessor = new ValidatingProcessor();
     DirectoryIterator directoryIterator = new DirectoryIterator(TestDirectoryIterator.TEST1_ARCHIVE,
-                                                                DirectoryFormat.Archive, false);
+      DirectoryFormat.Archive, false);
 
     directoryIterator.process(validatingProcessor);
     TestCase.assertEquals("10 Archive files are expected without a manifest", 10, validatingProcessor.validationErrors.size());
 
     Collection<ValidationError> nonFormatErrors = Collections2.filter(validatingProcessor.validationErrors,
-                                                                      new Predicate<ValidationError>() {
-                                                                        @Override
-                                                                        public boolean apply(
-                                                                            @Nullable ValidationError input) {
-                                                                          return input.errorId != ValidationError.INVALID_SYNC_DIR_PATH;
-                                                                        }
-                                                                      });
+      new Predicate<ValidationError>() {
+        @Override
+        public boolean apply(
+          @Nullable ValidationError input) {
+          return input.errorId != ValidationError.INVALID_SYNC_DIR_PATH;
+        }
+      });
     TestCase.assertEquals(11, nonFormatErrors.size());
   }
 
   //@Test
   public void testValidSyncNoManifest() throws Exception {
     ValidatingProcessor validatingProcessor = new ValidatingProcessor();
-    DirectoryIterator   directoryIterator = new DirectoryIterator(TestDirectoryIterator.TEST1_SYNC, DirectoryFormat.Sync, false);
+    DirectoryIterator directoryIterator = new DirectoryIterator(TestDirectoryIterator.TEST1_SYNC, DirectoryFormat.Sync, false);
 
     directoryIterator.process(validatingProcessor);
     TestCase.assertEquals("10 Sync files are expected without a manifest", 10, validatingProcessor.validationErrors.size());
@@ -55,7 +55,7 @@ public class TestValidatingProcessor {
   @Test
   public void testV2WithManyErrors() throws Exception {
     ValidatingProcessor validatingProcessor = new ValidatingProcessor();
-    DirectoryIterator   directoryIterator = new DirectoryIterator(ERROR_TEST1_ARCHIVE, null, true);
+    DirectoryIterator directoryIterator = new DirectoryIterator(ERROR_TEST1_ARCHIVE, null, true);
 
     directoryIterator.process(validatingProcessor);
     TestCase.assertEquals(7, validatingProcessor.validationErrors.size());
@@ -63,14 +63,14 @@ public class TestValidatingProcessor {
     ValidationError currError = validatingProcessor.validationErrors.get(0);
     TestCase.assertEquals(ValidationError.INVALID_DATA_IN_TBDATA, currError.errorId);
 
-    TbDataHasInvalidProperties  invalidProperties = (TbDataHasInvalidProperties) currError;
+    TbDataHasInvalidProperties invalidProperties = (TbDataHasInvalidProperties) currError;
     TestCase.assertEquals(1, invalidProperties.incorrectFilePropertyValues.size());
 
     int invalidDir = 0;
     int noDeviceInManifest = 0;
     int noTbEntryForDir = 0;
 
-    for (int i=1; i<validatingProcessor.validationErrors.size()-1; i++) {
+    for (int i = 1; i < validatingProcessor.validationErrors.size() - 1; i++) {
       currError = validatingProcessor.validationErrors.get(i);
       if (currError.errorId == ValidationError.INVALID_SYNC_DIR_PATH) {
         invalidDir++;
@@ -90,14 +90,14 @@ public class TestValidatingProcessor {
     //TestCase.assertEquals(1, noTbEntryForDir);
 
 
-    currError = validatingProcessor.validationErrors.get(validatingProcessor.validationErrors.size()-1);
+    currError = validatingProcessor.validationErrors.get(validatingProcessor.validationErrors.size() - 1);
     TestCase.assertEquals(ValidationError.UNMATCHED_TBDATA_ENTRIES, currError.errorId);
   }
 
   @Test
   public void testV1WithManyErrors() throws Exception {
     ValidatingProcessor validatingProcessor = new ValidatingProcessor();
-    DirectoryIterator   directoryIterator = new DirectoryIterator(ERROR_TEST2_SYNC, null, true);
+    DirectoryIterator directoryIterator = new DirectoryIterator(ERROR_TEST2_SYNC, null, true);
 
     directoryIterator.process(validatingProcessor);
     TestCase.assertEquals(3, validatingProcessor.validationErrors.size());

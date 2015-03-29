@@ -11,7 +11,7 @@ import java.util.List;
  */
 public class ContentPackage {
 
-  String         description;
+  String description;
   List<PlayList> playlists;
 
   public String getDescription() {

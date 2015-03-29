@@ -36,10 +36,10 @@ public class NORmsgMap {
     msgMap.totalMessages = byteBuffer.getShort();
     msgMap.msgIdMap = new ArrayList<>(msgMap.totalMessages);
 
-    byte[]  audioContentBuffer = new byte[FirmwareConstants.MAX_MESSAGE_ID_LENGTH * FirmwareConstants.SizeOfChar];
-    for (int i=0; i< FirmwareConstants.MAX_TRACKED_MESSAGES; i++) {
+    byte[] audioContentBuffer = new byte[FirmwareConstants.MAX_MESSAGE_ID_LENGTH * FirmwareConstants.SizeOfChar];
+    for (int i = 0; i < FirmwareConstants.MAX_TRACKED_MESSAGES; i++) {
       byteBuffer.get(audioContentBuffer);
-      if (i<msgMap.totalMessages) {
+      if (i < msgMap.totalMessages) {
         msgMap.msgIdMap.add(FirmwareConstants.decodeString(audioContentBuffer));
       }
     }

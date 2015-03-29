@@ -1,9 +1,9 @@
 package org.literacybridge.stats;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.io.filefilter.RegexFileFilter;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
-import org.apache.commons.io.FileUtils;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.literacybridge.stats.api.DirectoryCallbacks;
 import org.literacybridge.stats.model.*;
@@ -18,114 +18,113 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.util.*;
+import java.util.TreeSet;
 import java.util.regex.Pattern;
 import java.util.zip.ZipException;
 
 /**
  * This class is responsible for navigating the directory structure in a Stats Update Package.
- *
  */
 public class DirectoryIterator {
-  protected static final Logger logger = LoggerFactory.getLogger(DirectoryIterator.class);
-
-
   public static final Pattern UPDATE_PATTERN = Pattern.compile("(\\d+)-(\\w+)");
-
-  public static final Pattern TBDATA_PATTERN       = Pattern.compile("tbData-(\\d+)-(\\d+)-(\\d+).*");
+  public static final Pattern TBDATA_PATTERN = Pattern.compile("tbData-(\\d+)-(\\d+)-(\\d+).*");
   public static final Pattern SYNC_TIME_PATTERN_V1 = Pattern.compile("(\\d+)m(\\d+)d(\\d+)h(\\d+)m(\\d+)s");
   public static final Pattern SYNC_TIME_PATTERN_V2 = Pattern.compile("(\\d+)y(\\d+)m(\\d+)d(\\d+)h(\\d+)m(\\d+)s-(.*)");
   public static final Pattern SYNC_TIME_PATTERN_V2_NO_DEVICE_ID = Pattern.compile("(\\d+)y(\\d+)m(\\d+)d(\\d+)h(\\d+)m(\\d+)s");
-
-
   public static final Pattern TBDATA_PATTERN_V2 = Pattern.compile("tbData-v(\\d+)-(\\d+)y(\\d+)m(\\d+)d-(.*).csv");
-
-  //tbData-v00-2014y05m02d-9d8839de.csv
-
   public static final String MANIFEST_FILE_NAME = "StatsPackageManifest.json";
 
-  public static final String TBLOADER_LOG_DIR                 = "logs";
-  public static final String TBDATA_DIR_V2                    = "tbdata";
-  public static final String UPDATE_ROOT_V1                   = "collected-data";
+  //tbData-v00-2014y05m02d-9d8839de.csv
+  public static final String TBLOADER_LOG_DIR = "logs";
+  public static final String TBDATA_DIR_V2 = "tbdata";
+  public static final String UPDATE_ROOT_V1 = "collected-data";
   public static final String DEVICE_OPERATIONS_DIR_ARCHIVE_V2 = "OperationalData";
-  public static final String TALKING_BOOK_ROOT_V2             = "TalkingBookData";
-
-
+  public static final String TALKING_BOOK_ROOT_V2 = "TalkingBookData";
   public static final ObjectMapper mapper = new ObjectMapper();
+  protected static final Logger logger = LoggerFactory.getLogger(DirectoryIterator.class);
+  public final boolean strict;
+  public final File[] rootFiles;
+  public DirectoryFormat format;
 
-    /**
-     * Our Root detection has just gotten a lot more complicated.  There are a few
-     * things that can happen:
-     *
-     *     The root can be the root of the zip file
-     *     The root can be under the collected-data/* directory
-     *     There can be multiple roots under either the zip file's root or the collected-data
-     *
-     * THere are some zip files that are not properly formed, and start with
-     *   collected-data/*.  This will check to see if this is one of those zips.
-     * @param zipRoot the root directory the zip was expanded to
-     * @return the proper root directory to use for processing
-     */
+  public DirectoryIterator(File root, DirectoryFormat format, boolean strict) {
+    this.rootFiles = rootInFunnyZip(root);
+    this.strict = strict;
+    this.format = format;
+  }
+
+  /**
+   * Our Root detection has just gotten a lot more complicated.  There are a few
+   * things that can happen:
+   * <p/>
+   * The root can be the root of the zip file
+   * The root can be under the collected-data/* directory
+   * There can be multiple roots under either the zip file's root or the collected-data
+   * <p/>
+   * THere are some zip files that are not properly formed, and start with
+   * collected-data/*.  This will check to see if this is one of those zips.
+   *
+   * @param zipRoot the root directory the zip was expanded to
+   * @return the proper root directory to use for processing
+   */
   public static File[] rootInFunnyZip(File zipRoot) {
 
-      File  root = zipRoot;
-      File  collectedDataFile = new File(root, UPDATE_ROOT_V1);
-      if (collectedDataFile.exists())
-        root = collectedDataFile;
-      else {
-        File[] dbAccounts = root.listFiles();
-        File dropboxAccount = null;
-        for (File f:dbAccounts) {
-          if (f.isDirectory() && !f.isHidden() && !f.getName().startsWith("_") && !f.getName().startsWith(".")) { // avoid folders like __MACOSX
-            dropboxAccount = f;
-            break;
-          }
+    File root = zipRoot;
+    File collectedDataFile = new File(root, UPDATE_ROOT_V1);
+    if (collectedDataFile.exists())
+      root = collectedDataFile;
+    else {
+      File[] dbAccounts = root.listFiles();
+      File dropboxAccount = null;
+      for (File f : dbAccounts) {
+        if (f.isDirectory() && !f.isHidden() && !f.getName().startsWith("_") && !f.getName().startsWith(".")) { // avoid folders like __MACOSX
+          dropboxAccount = f;
+          break;
         }
-        if (dropboxAccount != null && dropboxAccount.exists()) {
-          File altCollectedDataFile = new File(dropboxAccount,UPDATE_ROOT_V1);
-          if (altCollectedDataFile.exists()) {
-            File[] projects = altCollectedDataFile.listFiles();
-            File project = null;
-            for (File f:projects) {
-              if (f.isDirectory() && !f.isHidden() && !f.getName().startsWith("_") && !f.getName().startsWith(".")) { // avoid folders like __MACOSX
-                // only one directory should match; if more than one, then this is the old style without a project dir
-                if (project == null) {
-                  project = f;
-                }
-                else {
-                  project = null;
-                  break;
-                }
+      }
+      if (dropboxAccount != null && dropboxAccount.exists()) {
+        File altCollectedDataFile = new File(dropboxAccount, UPDATE_ROOT_V1);
+        if (altCollectedDataFile.exists()) {
+          File[] projects = altCollectedDataFile.listFiles();
+          File project = null;
+          for (File f : projects) {
+            if (f.isDirectory() && !f.isHidden() && !f.getName().startsWith("_") && !f.getName().startsWith(".")) { // avoid folders like __MACOSX
+              // only one directory should match; if more than one, then this is the old style without a project dir
+              if (project == null) {
+                project = f;
+              } else {
+                project = null;
+                break;
               }
             }
-            if (project != null && project.exists()) {
-              System.out.println("   project directory listed");
-              root = project;
-            } else {
-              System.out.println("   OLD-no project directory listed");
-              root = altCollectedDataFile;
-            }
+          }
+          if (project != null && project.exists()) {
+            System.out.println("   project directory listed");
+            root = project;
+          } else {
+            System.out.println("   OLD-no project directory listed");
+            root = altCollectedDataFile;
           }
         }
       }
+    }
 
-      File[] processingRoots = new File[] {root};
+    File[] processingRoots = new File[]{root};
 
-      //If there is no talkingbookdata, then there are multiple roots
-      File talkingbookdata = new File(root, TALKING_BOOK_ROOT_V2);
-      if (!talkingbookdata.exists()) {
-        processingRoots = root.listFiles(new FileFilter() {
-          @Override
-          public boolean accept(File pathname) {
-            if (pathname.isDirectory() && !pathname.isHidden() && !pathname.getName().startsWith("_") && !pathname.getName().startsWith(".")) // avoid folders like __MACOSX
-              return true;
-            else
-              return false;
-          }
-        });
-      }
-      System.out.println("   Size:" + (int)(FileUtils.sizeOfDirectory(root)>>20) + "MB" + "  Start Time:" + System.currentTimeMillis()/1000);
-      return processingRoots;
+    //If there is no talkingbookdata, then there are multiple roots
+    File talkingbookdata = new File(root, TALKING_BOOK_ROOT_V2);
+    if (!talkingbookdata.exists()) {
+      processingRoots = root.listFiles(new FileFilter() {
+        @Override
+        public boolean accept(File pathname) {
+          if (pathname.isDirectory() && !pathname.isHidden() && !pathname.getName().startsWith("_") && !pathname.getName().startsWith(".")) // avoid folders like __MACOSX
+            return true;
+          else
+            return false;
+        }
+      });
+    }
+    System.out.println("   Size:" + (int) (FileUtils.sizeOfDirectory(root) >> 20) + "MB" + "  Start Time:" + System.currentTimeMillis() / 1000);
+    return processingRoots;
   }
 
   public static File getManifestFile(File root) {
@@ -138,7 +137,7 @@ public class DirectoryIterator {
     if (format == DirectoryFormat.Sync) {
       retVal = new File(root, FsUtils.FsAgnostify(device + "/" + UPDATE_ROOT_V1));
     } else {
-      retVal = new File(root, FsUtils.FsAgnostify(DEVICE_OPERATIONS_DIR_ARCHIVE_V2 + "/" + device + "/" + TBDATA_DIR_V2 ));
+      retVal = new File(root, FsUtils.FsAgnostify(DEVICE_OPERATIONS_DIR_ARCHIVE_V2 + "/" + device + "/" + TBDATA_DIR_V2));
     }
 
     return retVal;
@@ -150,27 +149,35 @@ public class DirectoryIterator {
     if (format == DirectoryFormat.Sync) {
       retVal = new File(root, FsUtils.FsAgnostify(device + "/" + UPDATE_ROOT_V1 + "/" + TBLOADER_LOG_DIR));
     } else {
-      retVal = new File(root, FsUtils.FsAgnostify(DEVICE_OPERATIONS_DIR_ARCHIVE_V2 + "/" + device + "/" + TBLOADER_LOG_DIR ));
+      retVal = new File(root, FsUtils.FsAgnostify(DEVICE_OPERATIONS_DIR_ARCHIVE_V2 + "/" + device + "/" + TBLOADER_LOG_DIR));
     }
 
     return retVal;
   }
 
-  public final boolean         strict;
-  public final File[]          rootFiles;
-  public       DirectoryFormat format;
+  public static StatsPackageManifest readInManifest(File manifestFile, DirectoryFormat format, boolean strict) throws IOException {
 
-  public DirectoryIterator(File root, DirectoryFormat format, boolean strict) {
-    this.rootFiles = rootInFunnyZip(root);
-    this.strict = strict;
-    this.format = format;
+    StatsPackageManifest manifest = mapper.readValue(manifestFile, StatsPackageManifest.class);
+    DirectoryFormat manifestFormat = DirectoryFormat.fromVersion(manifest.formatVersion);
+    if (format != null && format != manifestFormat) {
+      String errorMessage = "Format is set as " + manifestFormat +
+        " in the manifest, but the Directory iterator is created with format=" + format +
+        ".  If the directory will always have a manifest, you can simply create the DirectoryIterator with a null format.";
+      if (strict) {
+        throw new IllegalArgumentException(errorMessage);
+      }
+      logger.error(errorMessage);
+    }
+    format = manifestFormat;
+
+    return manifest;
   }
 
-    public void process(DirectoryCallbacks callbacks) throws Exception {
-      for (File currRoot : rootFiles) {
-        process(currRoot, callbacks);
-      }
+  public void process(DirectoryCallbacks callbacks) throws Exception {
+    for (File currRoot : rootFiles) {
+      process(currRoot, callbacks);
     }
+  }
 
   protected void process(final File root, DirectoryCallbacks callbacks) throws Exception {
     StatsPackageManifest manifest = null;
@@ -191,24 +198,6 @@ public class DirectoryIterator {
     }
 
     process(root, manifest, callbacks);
-  }
-
-  public static StatsPackageManifest readInManifest(File manifestFile, DirectoryFormat format, boolean strict) throws IOException {
-
-    StatsPackageManifest manifest = mapper.readValue(manifestFile, StatsPackageManifest.class);
-    DirectoryFormat manifestFormat = DirectoryFormat.fromVersion(manifest.formatVersion);
-    if (format != null && format != manifestFormat) {
-      String errorMessage = "Format is set as " + manifestFormat +
-          " in the manifest, but the Directory iterator is created with format=" + format +
-          ".  If the directory will always have a manifest, you can simply create the DirectoryIterator with a null format.";
-      if (strict) {
-        throw new IllegalArgumentException(errorMessage);
-      }
-      logger.error(errorMessage);
-    }
-    format = manifestFormat;
-
-    return manifest;
   }
 
   public StatsPackageManifest generateManifest(File root, DirectoryFormat format) throws Exception {
@@ -234,7 +223,7 @@ public class DirectoryIterator {
         boolean deviceAlreadyProcessed = false;
         boolean processDevice = false;
 
-        for (DeploymentPerDevice  deploymentPerDevice : deploymentPerDevices) {
+        for (DeploymentPerDevice deploymentPerDevice : deploymentPerDevices) {
           if (!deploymentPerDevice.device.equalsIgnoreCase(currDevice)) {
 
             if (processDevice) {
@@ -247,12 +236,12 @@ public class DirectoryIterator {
           }
 
           if (processDevice) {
-            File  tbdataDir = getTbDataDir(root, currDevice, format);
+            File tbdataDir = getTbDataDir(root, currDevice, format);
             // 
             if (!deviceAlreadyProcessed && tbdataDir.exists()) {
-            	// commenting out lines below and only procssing if tdbdir exists since 
-            	// there has been a case of know operationaldata directory and yet still good
-            	// stats to process.  TODO: need a good warning system for these issues.
+              // commenting out lines below and only procssing if tdbdir exists since
+              // there has been a case of know operationaldata directory and yet still good
+              // stats to process.  TODO: need a good warning system for these issues.
 //              if (!tbdataDir.exists()) {
 //                throw new IllegalArgumentException("Malformed directory structure.  The operations portion is not properly setup: " + tbdataDir.getPath() + " does not exist.");
 //              }
@@ -282,8 +271,8 @@ public class DirectoryIterator {
       }
 
       for (DeploymentPerDevice deploymentPerDevice : deploymentPerDevices) {
-        DeploymentId  deploymentId = DeploymentId.parseContentUpdate(deploymentPerDevice.deployment);
-        if (deploymentId.year==0 && strict) {
+        DeploymentId deploymentId = DeploymentId.parseContentUpdate(deploymentPerDevice.deployment);
+        if (deploymentId.year == 0 && strict) {
           throw new IllegalArgumentException("Illegal deployment: " + deploymentId);
         }
 
@@ -308,10 +297,10 @@ public class DirectoryIterator {
   }
 
   public void processVillage(DeploymentId deploymentId, File villageDir, DirectoryCallbacks callbacks) throws Exception {
-	  for (File talkingBook : villageDir.listFiles((FileFilter) DirectoryFileFilter.DIRECTORY)) {
+    for (File talkingBook : villageDir.listFiles((FileFilter) DirectoryFileFilter.DIRECTORY)) {
       if (callbacks.startTalkingBook(talkingBook.getName().trim())) {
-          processTalkingBook(deploymentId, talkingBook, callbacks);
-          callbacks.endTalkingBook();
+        processTalkingBook(deploymentId, talkingBook, callbacks);
+        callbacks.endTalkingBook();
       }
     }
   }
@@ -322,7 +311,7 @@ public class DirectoryIterator {
     File[] files = talkingBookDir.listFiles(fileFilter);
     for (File syncZip : files) {
       String filename = syncZip.getName().substring(0, syncZip.getName().length() - 4);
-      File folder = new File(talkingBookDir,filename);
+      File folder = new File(talkingBookDir, filename);
       if (folder.exists() && folder.isDirectory()) {
         FileUtils.deleteDirectory(folder);
       }
@@ -337,7 +326,7 @@ public class DirectoryIterator {
 
       SyncDirId syncDirId = SyncDirId.parseSyncDir(deploymentId, syncDir.getName().trim());
       if (syncDirId.dateTime != null) {
-        if (format == DirectoryFormat.Archive && syncDirId.version==1 && strict) {
+        if (format == DirectoryFormat.Archive && syncDirId.version == 1 && strict) {
           throw new IllegalArgumentException("Directory structure is the newer 'Archive' structure, but the sync directory is using the old format : " + syncDir.getName());
         }
 
@@ -348,11 +337,11 @@ public class DirectoryIterator {
 
   public TreeSet<DeploymentPerDevice> loadDeviceDeployments(final File root) {
 
-    TreeSet<DeploymentPerDevice> retVal =  new TreeSet<DeploymentPerDevice>(DeploymentPerDevice.ORDER_BY_DEVICE);
+    TreeSet<DeploymentPerDevice> retVal = new TreeSet<DeploymentPerDevice>(DeploymentPerDevice.ORDER_BY_DEVICE);
 
     if (format == DirectoryFormat.Sync) {
       for (File candidateDevice : root.listFiles((FileFilter) DirectoryFileFilter.DIRECTORY)) {
-        File  collectedData = new File(candidateDevice, UPDATE_ROOT_V1);
+        File collectedData = new File(candidateDevice, UPDATE_ROOT_V1);
         if (collectedData.exists() && collectedData.isDirectory()) {
           for (File deploymentDir : collectedData.listFiles((FileFilter) DirectoryFileFilter.DIRECTORY)) {
             if (UPDATE_PATTERN.matcher(deploymentDir.getName()).matches()) {
@@ -366,7 +355,7 @@ public class DirectoryIterator {
       if (talkingBookData.exists()) {  // in some cases, there may just be an OperationalData dir but no TalkingBookData
         for (File deploymentDir : talkingBookData.listFiles((FileFilter) DirectoryFileFilter.DIRECTORY)) {
           if (UPDATE_PATTERN.matcher(deploymentDir.getName()).matches() ||
-                  "UNKNOWN".equalsIgnoreCase(deploymentDir.getName())) {
+            "UNKNOWN".equalsIgnoreCase(deploymentDir.getName())) {
             for (File device : deploymentDir.listFiles((FileFilter) DirectoryFileFilter.DIRECTORY)) {
               retVal.add(new DeploymentPerDevice(deploymentDir.getName(), device.getName()));
             }

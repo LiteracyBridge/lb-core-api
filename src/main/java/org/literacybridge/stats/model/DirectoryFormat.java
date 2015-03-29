@@ -14,8 +14,10 @@ public enum DirectoryFormat {
 
   public static DirectoryFormat fromVersion(int version) {
     switch (version) {
-      case 1:  return Sync;
-      case 2:  return Archive;
+      case 1:
+        return Sync;
+      case 2:
+        return Archive;
       default:
         throw new IllegalArgumentException("No directory format corresponds to " + version);
     }

@@ -1,11 +1,7 @@
 package org.literacybridge.stats.processors;
 
-import org.literacybridge.stats.model.DeploymentPerDevice;
 import org.literacybridge.stats.api.DirectoryCallbacks;
-import org.literacybridge.stats.model.DeploymentId;
-import org.literacybridge.stats.model.DirectoryFormat;
-import org.literacybridge.stats.model.StatsPackageManifest;
-import org.literacybridge.stats.model.SyncDirId;
+import org.literacybridge.stats.model.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -14,13 +10,13 @@ import java.io.IOException;
  */
 abstract public class AbstractDirectoryProcessor implements DirectoryCallbacks {
 
-  protected File                  currRoot;
-  protected DirectoryFormat       format;
-  protected StatsPackageManifest  manifest;
-  protected DeploymentPerDevice   currDeploymentPerDevice;
-  protected DeploymentId          deploymentId;
-  protected String                currVillage;
-  protected String                currTalkingBook;
+  protected File currRoot;
+  protected DirectoryFormat format;
+  protected StatsPackageManifest manifest;
+  protected DeploymentPerDevice currDeploymentPerDevice;
+  protected DeploymentId deploymentId;
+  protected String currVillage;
+  protected String currTalkingBook;
 
   @Override
   public boolean startProcessing(File root, StatsPackageManifest manifest, DirectoryFormat format) throws Exception {
@@ -52,7 +48,7 @@ abstract public class AbstractDirectoryProcessor implements DirectoryCallbacks {
   }
 
   @Override
-  public void processTbLoaderLogFile(File logFile)  throws IOException {
+  public void processTbLoaderLogFile(File logFile) throws IOException {
 
   }
 

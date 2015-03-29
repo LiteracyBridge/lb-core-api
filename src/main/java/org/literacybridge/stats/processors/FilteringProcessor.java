@@ -1,7 +1,10 @@
 package org.literacybridge.stats.processors;
 
 import org.literacybridge.stats.api.DirectoryCallbacks;
-import org.literacybridge.stats.model.*;
+import org.literacybridge.stats.model.DeploymentPerDevice;
+import org.literacybridge.stats.model.DirectoryFormat;
+import org.literacybridge.stats.model.StatsPackageManifest;
+import org.literacybridge.stats.model.SyncDirId;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -11,7 +14,6 @@ import java.io.IOException;
 /**
  * A processor that can wrap another processor and filter out the talking book syncs that will be processed.  The
  * TBData processing can only be filtered at a per-device level.
- *
  */
 public class FilteringProcessor implements DirectoryCallbacks {
   public final DirectoryCallbacks callbacks;
@@ -69,7 +71,7 @@ public class FilteringProcessor implements DirectoryCallbacks {
 
   @Override
   public boolean startDeviceDeployment(DeploymentPerDevice deploymentPerDevice)
-      throws Exception {
+    throws Exception {
 
     if (allowedDevice != null && !allowedDevice.equalsIgnoreCase(deploymentPerDevice.device)) {
       return false;

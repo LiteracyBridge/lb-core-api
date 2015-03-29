@@ -5,16 +5,18 @@ import org.literacybridge.stats.model.DirectoryFormat;
 import org.literacybridge.stats.model.StatsPackageManifest;
 import org.literacybridge.stats.model.SyncDirId;
 import org.literacybridge.stats.model.SyncRange;
-import org.literacybridge.stats.processors.AbstractDirectoryProcessor;
 
 import java.io.File;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 /**
  */
 public class ManifestCreationCallbacks extends AbstractDirectoryProcessor {
 
-  Map<String, LocalDateTime> latestSyncs   = new HashMap<>();
+  Map<String, LocalDateTime> latestSyncs = new HashMap<>();
   Map<String, LocalDateTime> earliestSyncs = new HashMap<>();
 
   @Override
