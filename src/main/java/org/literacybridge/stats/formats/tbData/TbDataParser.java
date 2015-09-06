@@ -21,6 +21,73 @@ public class TbDataParser {
 
 
   protected static final Logger logger = LoggerFactory.getLogger(TbDataParser.class);
+
+  protected static final Map<String, Integer> V3_TB_MAP = ImmutableMap.<String, Integer>builder()
+          .put("PROJECT", 0)
+          .put("UPDATE_DATE_TIME", 1)
+          .put("OUT_SYNCH_DIR", 2)
+          .put("LOCATION", 3)
+          .put("ACTION", 4)
+          .put("DURATION_SEC", 5)
+          .put("OUT-SN", 6)
+          .put("OUT-DEPLOYMENT", 7)
+          .put("OUT-IMAGE", 8)
+          .put("OUT-FW-REV", 9)
+          .put("OUT-COMMUNITY", 10)
+          .put("OUT-ROTATION-DATE", 11)
+          .put("IN-SN", 12)
+          .put("IN-DEPLOYMENT", 13)
+          .put("IN-IMAGE", 14)
+          .put("IN-FW-REV", 15)
+          .put("IN-COMMUNITY", 16)
+          .put("IN-LAST-UPDATED", 17)
+          .put("IN-SYNCH-DIR", 18)
+          .put("IN-DISK-LABEL", 19)
+          .put("CHKDSK CORRUPTION?", 20)
+          .put("FLASH-SN", 21)
+          .put("FLASH-REFLASHES", 22)
+          .put("FLASH-DEPLOYMENT", 23)
+          .put("FLASH-IMAGE", 24)
+          .put("FLASH-COMMUNITY", 25)
+          .put("FLASH-LAST-UPDATED", 26)
+          .put("FLASH-CUM-DAYS", 27)
+          .put("FLASH-CORRUPTION-DAY", 28)
+          .put("FLASH-VOLT", 29)
+          .put("FLASH-POWERUPS", 30)
+          .put("FLASH-PERIODS", 31)
+          .put("FLASH-ROTATIONS", 32)
+          .put("FLASH-MSGS", 33)
+          .put("FLASH-MINUTES", 34)
+          .put("FLASH-STARTS", 35)
+          .put("FLASH-PARTIAL", 36)
+          .put("FLASH-HALF", 37)
+          .put("FLASH-MOST", 38)
+          .put("FLASH-ALL", 39)
+          .put("FLASH-APPLIED", 40)
+          .put("FLASH-USELESS", 41)
+          .put("FLASH-MINUTES-R0", 41)
+          .put("FLASH-PERIOD-R0", 42)
+          .put("FLASH-HRS-POST-UPDATE-R0", 43)
+          .put("FLASH-VOLT-R0", 44)
+          .put("FLASH-ROTATION", 45)
+          .put("FLASH-MINUTES-R1", 46)
+          .put("FLASH-PERIOD-R1", 47)
+          .put("FLASH-HRS-POST-UPDATE-R1", 48)
+          .put("FLASH-VOLT-R1", 49)
+          .put("FLASH-MINUTES-R2", 50)
+          .put("FLASH-PERIOD-R2", 51)
+          .put("FLASH-HRS-POST-UPDATE-R2", 52)
+          .put("FLASH-VOLT-R2", 53)
+          .put("FLASH-MINUTES-R3", 54)
+          .put("FLASH-PERIOD-R3", 55)
+          .put("FLASH-HRS-POST-UPDATE-R3", 56)
+          .put("FLASH-VOLT-R3", 57)
+          .put("FLASH-MINUTES-R4", 58)
+          .put("FLASH-PERIOD-R4", 59)
+          .put("FLASH-HRS-POST-UPDATE-R4", 60)
+          .put("FLASH-VOLT-R4", 61)
+          .build();
+
   protected static final Map<String, Integer> V1_TB_MAP = ImmutableMap.<String, Integer>builder()
     .put("UPDATE_DATE_TIME", 0)
     .put("IN-SYNCH-DIR", 0)
@@ -61,8 +128,18 @@ public class TbDataParser {
 
   protected static final char[] FIELD_DELIMITERS = new char[]{'-'};
 
+  private static <T, E> T getKeyByValue(Map<T, E> map, E value) {
+    for (Map.Entry<T, E> entry : map.entrySet()) {
+      if (Objects.equals(value, entry.getValue())) {
+        return entry.getKey();
+      }
+    }
+    return null;
+  }
+
   public List<TbDataLine> parseTbDataFile(File tbdataFile, boolean includesHeaders) throws IOException {
 
+    System.out.println(" reading " + tbdataFile.getName());
     List<TbDataLine> retVal = new ArrayList<>();
     FileReader fileReader = new FileReader(tbdataFile);
     CSVReader csvReader = new CSVReader(fileReader);
@@ -70,15 +147,25 @@ public class TbDataParser {
     int lineNumber = 1;
     List<String[]> lines = csvReader.readAll();
 
-    Map<String, Integer> headerMap = V1_TB_MAP;
-    if (getTBdataVersion(tbdataFile) == 0) {
+    Map<String, Integer> headerMap = V3_TB_MAP;
+    if (getTBdataVersion(tbdataFile) == 1) {
+      headerMap = V1_TB_MAP;
+    } else if (getTBdataVersion(tbdataFile) == 0) {
       headerMap = V0_TB_MAP;
     }
 
     for (String[] line : lines) {
+
       if (lineNumber == 1 && includesHeaders) {
-        headerMap = processHeader(line);
-      } else {
+        String firstHeaderDefined = getKeyByValue(headerMap,0);
+        String firstHeaderActual = line[0];
+        if (firstHeaderActual.equalsIgnoreCase(firstHeaderDefined)) {
+          headerMap = processHeader(line);
+        } else {
+          includesHeaders = false;
+        }
+      }
+      if (!(lineNumber == 1 && includesHeaders)) {
         try {
           retVal.add(processLine(line, headerMap));
           processLine(line, headerMap);
@@ -108,6 +195,7 @@ public class TbDataParser {
   }
 
   protected void setProperty(String propertyName, Map<String, String> lineValues, TbDataLine line) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+
     if (lineValues.containsKey(propertyName)) {
       String[] propertyNameParts = propertyName.toLowerCase().split("[? _-]");
 
@@ -139,7 +227,11 @@ public class TbDataParser {
           logger.error("Invalid date value " + lineValues.get(propertyName) + ".  Ignoring field " + propertyName + ".");
         }
       } else if (type.equals(int.class) || type.equals(Integer.TYPE)) {
-        setter.invoke(line, new Integer(lineValues.get(propertyName)));
+        try {
+          setter.invoke(line, new Integer(lineValues.get(propertyName)));
+        } catch (NumberFormatException e) {
+          logger.error("Invalid integer value " + lineValues.get(propertyName) + ".  Ignoring field " + propertyName + ".");
+        }
       } else {
         setter.invoke(line, lineValues.get(propertyName));
       }

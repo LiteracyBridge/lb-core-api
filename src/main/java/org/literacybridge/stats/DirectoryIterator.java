@@ -299,6 +299,7 @@ public class DirectoryIterator {
   public void processVillage(DeploymentId deploymentId, File villageDir, DirectoryCallbacks callbacks) throws Exception {
     for (File talkingBook : villageDir.listFiles((FileFilter) DirectoryFileFilter.DIRECTORY)) {
       if (callbacks.startTalkingBook(talkingBook.getName().trim())) {
+        System.out.println("     " + talkingBook.getName().trim());
         processTalkingBook(deploymentId, talkingBook, callbacks);
         callbacks.endTalkingBook();
       }
