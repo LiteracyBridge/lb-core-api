@@ -77,7 +77,7 @@ abstract public class Event implements Serializable {
   }
 
   public void setPackageId(String packageId) {
-    this.packageId = packageId;
+    this.packageId = packageId.toUpperCase();
   }
 
   public String getVillage() {
