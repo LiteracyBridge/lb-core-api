@@ -55,12 +55,11 @@ public class DeploymentPerDevice {
   }
 
   public File getSyncRoot(File basePath) {
-    return new File(basePath, FsUtils.FsAgnostify(
-      device + "/" + DirectoryIterator.UPDATE_ROOT_V1 + "/" + deployment));
+    return FsUtils.FileIgnoreCase(basePath, DirectoryIterator.UPDATE_ROOT_V1, deployment);
   }
 
   public File getArchiveRoot(File basePath) {
-    return new File(basePath, FsUtils.FsAgnostify(DirectoryIterator.TALKING_BOOK_ROOT_V2 + "/" + deployment + "/" + device));
+    return FsUtils.FileIgnoreCase(basePath, DirectoryIterator.TALKING_BOOK_ROOT_V2, deployment, device);
   }
 
 

@@ -27,11 +27,11 @@ import java.util.zip.ZipException;
  */
 public class DirectoryIterator {
   public static final Pattern UPDATE_PATTERN = Pattern.compile("(\\d+)-(\\w+)");
-  public static final Pattern TBDATA_PATTERN = Pattern.compile("tbData-(\\d+)-(\\d+)-(\\d+).*");
-  public static final Pattern SYNC_TIME_PATTERN_V1 = Pattern.compile("(\\d+)m(\\d+)d(\\d+)h(\\d+)m(\\d+)s");
-  public static final Pattern SYNC_TIME_PATTERN_V2 = Pattern.compile("(\\d+)y(\\d+)m(\\d+)d(\\d+)h(\\d+)m(\\d+)s-(.*)");
-  public static final Pattern SYNC_TIME_PATTERN_V2_NO_DEVICE_ID = Pattern.compile("(\\d+)y(\\d+)m(\\d+)d(\\d+)h(\\d+)m(\\d+)s");
-  public static final Pattern TBDATA_PATTERN_V2 = Pattern.compile("tbData-v(\\d+)-(\\d+)y(\\d+)m(\\d+)d-(.*).csv");
+  public static final Pattern TBDATA_PATTERN = Pattern.compile("tbData-(\\d+)-(\\d+)-(\\d+).*", Pattern.CASE_INSENSITIVE);
+  public static final Pattern SYNC_TIME_PATTERN_V1 = Pattern.compile("(\\d+)m(\\d+)d(\\d+)h(\\d+)m(\\d+)s", Pattern.CASE_INSENSITIVE);
+  public static final Pattern SYNC_TIME_PATTERN_V2 = Pattern.compile("(\\d+)y(\\d+)m(\\d+)d(\\d+)h(\\d+)m(\\d+)s-(.*)", Pattern.CASE_INSENSITIVE);
+  public static final Pattern SYNC_TIME_PATTERN_V2_NO_DEVICE_ID = Pattern.compile("(\\d+)y(\\d+)m(\\d+)d(\\d+)h(\\d+)m(\\d+)s", Pattern.CASE_INSENSITIVE);
+  public static final Pattern TBDATA_PATTERN_V2 = Pattern.compile("tbData-v(\\d+)-(\\d+)y(\\d+)m(\\d+)d-(.*).csv", Pattern.CASE_INSENSITIVE);
   public static final String MANIFEST_FILE_NAME = "StatsPackageManifest.json";
 
   //tbData-v00-2014y05m02d-9d8839de.csv
@@ -111,7 +111,7 @@ public class DirectoryIterator {
     File[] processingRoots = new File[]{root};
 
     //If there is no talkingbookdata, then there are multiple roots
-    File talkingbookdata = new File(root, TALKING_BOOK_ROOT_V2);
+    File talkingbookdata = FsUtils.FileIgnoreCase(root, TALKING_BOOK_ROOT_V2);
     if (!talkingbookdata.exists()) {
       processingRoots = root.listFiles(new FileFilter() {
         @Override
@@ -135,9 +135,9 @@ public class DirectoryIterator {
     File retVal;
 
     if (format == DirectoryFormat.Sync) {
-      retVal = new File(root, FsUtils.FsAgnostify(device + "/" + UPDATE_ROOT_V1));
+      retVal = FsUtils.FileIgnoreCase(root, device, UPDATE_ROOT_V1);
     } else {
-      retVal = new File(root, FsUtils.FsAgnostify(DEVICE_OPERATIONS_DIR_ARCHIVE_V2 + "/" + device + "/" + TBDATA_DIR_V2));
+      retVal = FsUtils.FileIgnoreCase(root, DEVICE_OPERATIONS_DIR_ARCHIVE_V2, device, TBDATA_DIR_V2);
     }
 
     return retVal;
@@ -147,9 +147,9 @@ public class DirectoryIterator {
     File retVal;
 
     if (format == DirectoryFormat.Sync) {
-      retVal = new File(root, FsUtils.FsAgnostify(device + "/" + UPDATE_ROOT_V1 + "/" + TBLOADER_LOG_DIR));
+      retVal = FsUtils.FileIgnoreCase(root, device, UPDATE_ROOT_V1, TBLOADER_LOG_DIR);
     } else {
-      retVal = new File(root, FsUtils.FsAgnostify(DEVICE_OPERATIONS_DIR_ARCHIVE_V2 + "/" + device + "/" + TBLOADER_LOG_DIR));
+      retVal = FsUtils.FileIgnoreCase(root, DEVICE_OPERATIONS_DIR_ARCHIVE_V2, device, TBLOADER_LOG_DIR);
     }
 
     return retVal;
@@ -352,7 +352,7 @@ public class DirectoryIterator {
         }
       }
     } else {
-      File talkingBookData = new File(root, TALKING_BOOK_ROOT_V2);
+      File talkingBookData = FsUtils.FileIgnoreCase(root, TALKING_BOOK_ROOT_V2);
       if (talkingBookData.exists()) {  // in some cases, there may just be an OperationalData dir but no TalkingBookData
         for (File deploymentDir : talkingBookData.listFiles((FileFilter) DirectoryFileFilter.DIRECTORY)) {
           if (UPDATE_PATTERN.matcher(deploymentDir.getName()).matches() ||

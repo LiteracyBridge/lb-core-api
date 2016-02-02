@@ -17,6 +17,56 @@ public class FsUtils {
     return fsPath.replace('/', File.separatorChar);
   }
 
+    /**
+     * Like File, except that if the given child does not exist, will look for a file with a case-insensitive
+     * variant of the child name.
+     * @param parent The File, a directory, under which to look for the child.
+     * @param child The name of the file, possibly with different casing.
+     * @return A File with the given path. The returned File, if it exists, may have a casing different
+     * than what was given. If the file does not exist, the name will be as given (because no substitution
+     * was performed).
+     */
+    private static final File FileIgnoreCaseHelper(File parent, final String child) {
+        File retval = new File(parent, child);
+        // Check for name that matches, ignoring case.
+        if (!retval.exists()) {
+            File [] candidates = parent.listFiles(new FilenameFilter() {
+                boolean found = false;
+                @Override
+                public boolean accept(File dir, String name) {
+                    // Accept the first file that matches case insenstively.
+                    if (!found && name.equalsIgnoreCase(child)) {
+                        found = true;
+                        return true;
+                    }
+                    return false;
+                }
+            });
+            // If candidates contains a file, we know it exists, so use it.
+            if (candidates.length == 1) {
+                retval = candidates[0];
+            }
+        }
+        return retval;
+    }
+
+    /**
+     * Creates a File from an existing File and one or more path components, by appending the path components one
+     * by one. At every step, if the given path component name does not exist, but there is a file or directory that
+     * matches with a different casing, that matching file is substituted.
+     * @param parent The File, a directory, under which to look for the child.
+     * @param pathToChild A sequence of path components, like ["a", "b", "c"], to look for File/a/b/c.
+     * @return A File with the given path.
+     */
+    public static final File FileIgnoreCase(File parent, String... pathToChild) {
+        File file = parent;
+        // Add the child parts of the path, one at a time.
+        for (String child : pathToChild) {
+             file = FileIgnoreCaseHelper(file, child);
+        }
+        return file;
+    }
+
   public static HashingInputStream createSHAStream(InputStream is) {
     return new HashingInputStream(Hashing.sha256(), is);
   }
