@@ -1,20 +1,9 @@
-lb-core-api
+~~lb-core-api~~ This project has been deprecated.
 ===========
 
-This is a first crack at some pieces of the Literacy Bridge core API.  This will likely go away and be subsumed by other work, in the not too distant future.
-
-## Building and Artifacts ##
-
-### Prerequisites ###
-
-**Java 7**
-:  This project required Java 7.  Make sure you have it installed and the default JVM.
-
-**Maven**
-: This project currently uses Maven for building.  Make sure you have maven installed.  If you don't you can get one at http://maven.apache.org/download.cgi
-
-### Building ###
-
-    mvn clean install
-    
-will run maven, build the project, run all the unit tests and install it into your local maven repository.
+This project has been merged into the dashboard-core project. History and
+tests were preserved.
+* That project was the only use of this one
+* There are deep linkages between this project and that one
+* By merging, testing and deployment becomes easier
+* Vastly easier to browse a single project than two.
